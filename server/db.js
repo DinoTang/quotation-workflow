@@ -16,31 +16,47 @@ var DEFAULT_META = {
     "Dữ liệu nghiệp vụ hiện đang ở trạng thái Placeholder minh họa (dự kiến khoảng 7 bước sơ bộ). Tên bước, chủ trì, phối hợp, chứng từ và rủi ro sẽ được điền chính xác sau khi nhận tài liệu quy trình báo giá chính thức."
 };
 
+function getSupabaseServiceKey() {
+  return (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || "").trim();
+}
+
+function isLegacyJwtKey(key) {
+  // Legacy service_role keys are 3-segment JWTs; new sb_secret_ keys are opaque tokens and must NOT be sent as Bearer JWTs.
+  return typeof key === "string" && !key.startsWith("sb_") && key.split(".").length === 3;
+}
+
 function useLocalDevStore() {
   return (
     process.env.QUOTATION_LOCAL_DEV_DB === "1" &&
     process.env.VERCEL !== "1" &&
-    (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY)
+    (!process.env.SUPABASE_URL || !getSupabaseServiceKey())
   );
 }
 
 function getSupabaseConfig() {
-  var url = (process.env.SUPABASE_URL || "").replace(/\/+$/, "");
-  var serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+  var url = (process.env.SUPABASE_URL || "").trim().replace(/\/+$/, "");
+  var serviceKey = getSupabaseServiceKey();
   if (!url || !serviceKey) {
     throw new Error("SUPABASE_NOT_CONFIGURED");
+  }
+  if (serviceKey.startsWith("sb_publishable_")) {
+    throw new Error("SUPABASE_PUBLISHABLE_KEY_NOT_ALLOWED");
   }
   return { url: url, serviceKey: serviceKey };
 }
 
 async function supabaseFetch(endpoint, options) {
   var cfg = getSupabaseConfig();
+  var baseHeaders = {
+    apikey: cfg.serviceKey,
+    "Content-Type": "application/json"
+  };
+  if (isLegacyJwtKey(cfg.serviceKey)) {
+    baseHeaders.Authorization = "Bearer " + cfg.serviceKey;
+  }
+
   var headers = Object.assign(
-    {
-      apikey: cfg.serviceKey,
-      Authorization: "Bearer " + cfg.serviceKey,
-      "Content-Type": "application/json"
-    },
+    baseHeaders,
     (options && options.headers) || {}
   );
 

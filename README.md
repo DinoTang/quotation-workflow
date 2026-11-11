@@ -68,9 +68,9 @@ Quotation-Workflow/
 1. Tạo một project mới trên Supabase.
 2. Mở **SQL Editor** trong Supabase Dashboard, dán toàn bộ nội dung file `supabase/schema.sql` và chạy **Run**.
    - Script sẽ tạo bảng `workflow_meta`, `workflow_steps`, bật RLS an toàn và nạp sẵn 7 bước Placeholder sơ bộ với nội dung `"Chưa được cung cấp"`.
-3. Vào **Project Settings → API** để lấy:
+3. Vào **Project Settings → API Keys** (hoặc **API**) để lấy:
    - `Project URL` → dùng cho biến `SUPABASE_URL`
-   - `service_role` key (bí mật) → dùng cho biến `SUPABASE_SERVICE_ROLE_KEY`
+   - **Secret API Key** mới (`sb_secret_...`) hoặc legacy `service_role` key → dùng cho biến `SUPABASE_SERVICE_ROLE_KEY`
 
 ### Bước 2: Triển khai lên Vercel
 
@@ -78,7 +78,7 @@ Quotation-Workflow/
 2. Tạo Project trên Vercel trỏ vào repository này (Framework Preset: **Other**, Build Command để trống, Output Directory để trống).
 3. Trong **Project Settings → Environment Variables**, khai báo 4 biến môi trường:
    - `SUPABASE_URL`: URL của project Supabase
-   - `SUPABASE_SERVICE_ROLE_KEY`: Service Role Key của Supabase *(chỉ dùng trên server)*
+   - `SUPABASE_SERVICE_ROLE_KEY`: Secret API Key (`sb_secret_...`) hoặc `service_role` key của Supabase *(chỉ dùng trên server)*
    - `ADMIN_PASSWORD`: Mật khẩu dùng chung cho người quản lý *(hoặc dùng `ADMIN_PASSWORD_HASH` theo định dạng `scrypt:<salt>:<hex>`)*
    - `ADMIN_SESSION_SECRET`: Chuỗi bí mật ngẫu nhiên tối thiểu 32 ký tự để ký session cookie
 4. Nhấn **Deploy** (hoặc **Redeploy** sau khi lưu biến môi trường).

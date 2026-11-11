@@ -69,7 +69,11 @@ function bootstrapDevEnvironment() {
   loadEnvFile(path.join(ROOT_DIR, ".env"));
   loadEnvFile(path.join(ROOT_DIR, ".env.local"));
 
-  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  var hasSupabaseKey = Boolean(
+    (process.env.SUPABASE_SERVICE_ROLE_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY.trim()) ||
+    (process.env.SUPABASE_SECRET_KEY && process.env.SUPABASE_SECRET_KEY.trim())
+  );
+  if (!process.env.SUPABASE_URL || !hasSupabaseKey) {
     process.env.QUOTATION_LOCAL_DEV_DB = "1";
     console.log("[dev-server] SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY chưa cấu hình -> dùng JSON dev store cục bộ.");
   }
