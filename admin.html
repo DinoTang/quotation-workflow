@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Quản lý quy trình báo giá</title>
+  <meta name="description" content="Khu vực quản trị tập trung để thêm, sửa, xóa và sắp xếp các bước trong quy trình báo giá.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230F2D30'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11.5' stroke='%23F5B841' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem("quotation_workflow_theme_v1");
+        if (saved === "dark" || saved === "light") {
+          document.documentElement.setAttribute("data-theme", saved);
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="admin-shell">
+
+  <header class="masthead">
+    <div class="mast-in">
+      <div class="mast-top">
+        <div class="eyebrow">
+          <span>Khu vực quản trị</span>
+          <span aria-hidden="true">·</span>
+          <b>Quy trình báo giá</b>
+          <span aria-hidden="true">·</span>
+          <span>Bảo vệ phía máy chủ</span>
+        </div>
+        <div class="mast-actions">
+          <a class="admin-back-link" href="/">← Xem trang quy trình</a>
+          <button class="theme-btn" type="button" id="themeToggle" aria-label="Chuyển giao diện sáng hoặc tối">
+            <span class="theme-ico" aria-hidden="true">◐</span>
+            <span id="themeLabel">Giao diện</span>
+          </button>
+        </div>
+      </div>
+
+      <h1>Quản lý quy trình báo giá</h1>
+      <p class="dek">
+        Thêm, chỉnh sửa nội dung, sắp xếp thứ tự hoặc xóa các bước quy trình tập trung.
+        Các chỉnh sửa và thay đổi thứ tự luôn giữ nguyên <strong>ID cố định</strong> để không làm mất dấu hoàn thành trên máy của người dùng.
+      </p>
+    </div>
+  </header>
+
+  <div class="shell admin-main">
+    <main class="board">
+      <div class="board-inner">
+
+        <!-- Loading Session State -->
+        <section class="admin-login-wrap" id="adminAuthLoading">
+          <div class="admin-card">
+            <h2 class="admin-card-title">Đang kiểm tra phiên đăng nhập...</h2>
+            <p class="admin-card-sub">Vui lòng đợi trong giây lát để xác thực quyền quản lý từ máy chủ.</p>
+          </div>
+        </section>
+
+        <!-- Login Form View -->
+        <section class="admin-login-wrap" id="adminLoginView" hidden>
+          <div class="admin-card">
+            <div class="admin-card-head">
+              <div>
+                <h2 class="admin-card-title">Đăng nhập quản trị</h2>
+                <p class="admin-card-sub">Nhập mật khẩu dùng chung của nhóm quản lý để mở khóa quyền chỉnh sửa dữ liệu.</p>
+              </div>
+            </div>
+
+            <form class="admin-form" id="adminLoginForm">
+              <div class="admin-error-box" id="adminLoginError" role="alert" hidden></div>
+
+              <div class="admin-field">
+                <label class="admin-label" for="adminPasswordInput">Mật khẩu quản lý</label>
+                <input
+                  class="admin-input"
+                  id="adminPasswordInput"
+                  name="password"
+                  type="password"
+                  autocomplete="current-password"
+                  placeholder="Nhập mật khẩu quản trị"
+                  required>
+              </div>
+
+              <div class="admin-form-actions">
+                <a class="btn-secondary" href="/">Quay lại trang chính</a>
+                <button class="btn-primary" type="submit" id="adminLoginSubmit">Mở khóa quản lý</button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- Authenticated Workspace -->
+        <section class="admin-stack" id="adminWorkspaceView" hidden>
+          <div class="admin-toolbar">
+            <div class="admin-toolbar-info">
+              <span class="admin-status-pill">● Đã xác thực quản trị</span>
+              <span class="admin-card-sub" id="adminStepsSummary">Đang tải dữ liệu...</span>
+            </div>
+            <div class="admin-toolbar-actions">
+              <button class="btn-secondary" type="button" id="adminRefreshBtn">Tải lại</button>
+              <button class="btn-primary" type="button" id="adminAddStepBtn">+ Thêm bước mới</button>
+              <button class="btn-secondary" type="button" id="adminLogoutBtn">Đăng xuất</button>
+            </div>
+          </div>
+
+          <div class="admin-error-box" id="adminWorkspaceError" role="alert" hidden></div>
+
+          <!-- Steps Management Card -->
+          <section class="admin-card" aria-labelledby="stepsSectionTitle">
+            <div class="admin-card-head">
+              <div>
+                <h2 class="admin-card-title" id="stepsSectionTitle">Danh sách các bước trong quy trình</h2>
+                <p class="admin-card-sub">
+                  Sửa nội dung hoặc nhấn Lên/Xuống để sắp xếp lại trình tự (ID cố định vẫn được bảo toàn).
+                  Xóa một bước và tạo lại sẽ sinh ID mới.
+                </p>
+              </div>
+            </div>
+
+            <div class="admin-steps-list" id="adminStepsList"></div>
+          </section>
+
+          <!-- Workflow Metadata Card -->
+          <section class="admin-card" aria-labelledby="metaSectionTitle">
+            <div class="admin-card-head">
+              <div>
+                <h2 class="admin-card-title" id="metaSectionTitle">Thông tin chung &amp; Ghi chú đầu trang</h2>
+                <p class="admin-card-sub">Các thông tin này hiển thị đồng bộ ở phần đầu trang và chân trang cho mọi người dùng.</p>
+              </div>
+            </div>
+
+            <form class="admin-form" id="adminMetaForm">
+              <div class="admin-grid-2">
+                <div class="admin-field">
+                  <label class="admin-label" for="metaTitle">Tiêu đề quy trình *</label>
+                  <input class="admin-input" id="metaTitle" name="title" type="text" maxlength="160" required>
+                </div>
+                <div class="admin-field">
+                  <label class="admin-label" for="metaVersion">Phiên bản tài liệu</label>
+                  <input class="admin-input" id="metaVersion" name="version" type="text" maxlength="80">
+                </div>
+              </div>
+
+              <div class="admin-grid-2">
+                <div class="admin-field">
+                  <label class="admin-label" for="metaCategory">Nhóm tài liệu</label>
+                  <input class="admin-input" id="metaCategory" name="eyebrowCategory" type="text" maxlength="80">
+                </div>
+                <div class="admin-field">
+                  <label class="admin-label" for="metaModule">Tên phân hệ</label>
+                  <input class="admin-input" id="metaModule" name="eyebrowModule" type="text" maxlength="80">
+                </div>
+              </div>
+
+              <div class="admin-grid-2">
+                <div class="admin-field">
+                  <label class="admin-label" for="metaOrg">Đơn vị ban hành</label>
+                  <input class="admin-input" id="metaOrg" name="organization" type="text" maxlength="140">
+                </div>
+                <div class="admin-field">
+                  <label class="admin-label" for="metaContact">Đầu mối cập nhật</label>
+                  <input class="admin-input" id="metaContact" name="maintainerContact" type="text" maxlength="140">
+                </div>
+              </div>
+
+              <div class="admin-field">
+                <label class="admin-label" for="metaSource">Tài liệu gốc tham chiếu (chân trang)</label>
+                <input class="admin-input" id="metaSource" name="sourceDocument" type="text" maxlength="200">
+              </div>
+
+              <div class="admin-field">
+                <label class="admin-label" for="metaDek">Mô tả ngắn đầu trang (tùy chọn)</label>
+                <textarea class="admin-textarea" id="metaDek" name="dek" rows="2" maxlength="1000" placeholder="Để trống nếu muốn giữ mô tả mặc định của trang."></textarea>
+              </div>
+
+              <label class="admin-checkbox-row" for="metaIsDraft">
+                <input id="metaIsDraft" name="isDraftPlaceholder" type="checkbox">
+                <span>Hiển thị banner cảnh báo trạng thái Placeholder minh họa trên trang chính</span>
+              </label>
+
+              <div class="admin-field">
+                <label class="admin-label" for="metaDraftBanner">Nội dung banner cảnh báo Placeholder</label>
+                <textarea class="admin-textarea" id="metaDraftBanner" name="draftBannerText" rows="2" maxlength="600"></textarea>
+              </div>
+
+              <div class="admin-error-box" id="adminMetaError" role="alert" hidden></div>
+
+              <div class="admin-form-actions">
+                <button class="btn-primary" type="submit" id="adminSaveMetaBtn">Lưu thông tin chung</button>
+              </div>
+            </form>
+          </section>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <footer>
+    <div class="fin">
+      <span>Khu vực quản trị nội dung quy trình báo giá (xác thực qua API máy chủ).</span>
+      <span class="fin-right">
+        <a class="footer-admin-link" href="/">← Mở trang người dùng</a>
+      </span>
+    </div>
+  </footer>
+
+  <!-- Step Add / Edit Modal -->
+  <div class="modal-backdrop" id="stepEditorModal" hidden>
+    <div class="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="stepModalTitle">
+      <div class="modal-head">
+        <div>
+          <h3 id="stepModalTitle">Chỉnh sửa bước</h3>
+          <p class="admin-card-sub" id="stepModalSub"></p>
+        </div>
+      </div>
+
+      <form class="admin-form" id="stepEditorForm">
+        <div class="admin-grid-2">
+          <div class="admin-field">
+            <label class="admin-label" for="stepCodeInput">Mã / Số thứ tự hiển thị *</label>
+            <input class="admin-input" id="stepCodeInput" type="text" maxlength="40" placeholder="Ví dụ: Bước 01" required>
+          </div>
+          <div class="admin-field">
+            <label class="admin-label" for="stepTitleInput">Tên bước *</label>
+            <input class="admin-input" id="stepTitleInput" type="text" maxlength="220" placeholder="Nhập tên bước quy trình" required>
+          </div>
+        </div>
+
+        <label class="admin-checkbox-row" for="stepPlaceholderInput">
+          <input id="stepPlaceholderInput" type="checkbox">
+          <span>Đánh dấu bước này đang ở trạng thái Placeholder minh họa</span>
+        </label>
+
+        <div class="admin-field">
+          <label class="admin-label" for="stepDescInput">1. Nội dung công việc</label>
+          <span class="admin-hint">Nếu có nhiều ý, xuống dòng cho mỗi ý. Để trống sẽ hiển thị "Chưa được cung cấp".</span>
+          <textarea class="admin-textarea" id="stepDescInput" rows="3" placeholder="Nhập chi tiết công việc cần làm..."></textarea>
+        </div>
+
+        <div class="admin-grid-2">
+          <div class="admin-field">
+            <label class="admin-label" for="stepLeadInput">2a. Bộ phận / Nhân sự chủ trì</label>
+            <span class="admin-hint">Mỗi dòng một vai trò hoặc nhập một đoạn văn.</span>
+            <textarea class="admin-textarea" id="stepLeadInput" rows="2" placeholder="Chưa được cung cấp"></textarea>
+          </div>
+          <div class="admin-field">
+            <label class="admin-label" for="stepCollabInput">2b. Liên hệ / Phối hợp</label>
+            <span class="admin-hint">Mỗi dòng một bộ phận hoặc cá nhân phối hợp.</span>
+            <textarea class="admin-textarea" id="stepCollabInput" rows="2" placeholder="Chưa được cung cấp"></textarea>
+          </div>
+        </div>
+
+        <div class="admin-grid-2">
+          <div class="admin-field">
+            <label class="admin-label" for="stepInputsInput">3a. Chứng từ / Tài liệu đầu vào</label>
+            <span class="admin-hint">Mỗi dòng một chứng từ đầu vào.</span>
+            <textarea class="admin-textarea" id="stepInputsInput" rows="3" placeholder="Chưa được cung cấp"></textarea>
+          </div>
+          <div class="admin-field">
+            <label class="admin-label" for="stepOutputsInput">3b. Kết quả / Chứng từ đầu ra</label>
+            <span class="admin-hint">Mỗi dòng một kết quả / chứng từ đầu ra.</span>
+            <textarea class="admin-textarea" id="stepOutputsInput" rows="3" placeholder="Chưa được cung cấp"></textarea>
+          </div>
+        </div>
+
+        <div class="admin-field">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+            <label class="admin-label">4. Rủi ro phát sinh &amp; Cách giải quyết</label>
+            <button class="admin-icon-btn" type="button" id="addRiskRowBtn">+ Thêm dòng rủi ro</button>
+          </div>
+          <div class="admin-risk-list" id="stepRisksList"></div>
+        </div>
+
+        <div class="admin-error-box" id="stepEditorError" role="alert" hidden></div>
+
+        <div class="modal-foot">
+          <button class="btn-secondary" type="button" id="stepModalCancelBtn">Hủy</button>
+          <button class="btn-primary" type="submit" id="stepModalSaveBtn">Lưu bước</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Step Confirmation Modal -->
+  <div class="modal-backdrop" id="deleteStepModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+      <div class="modal-head">
+        <div class="modal-icon" aria-hidden="true">!</div>
+        <h3 id="deleteModalTitle">Xóa bước quy trình?</h3>
+      </div>
+      <div class="modal-body">
+        <p>Bạn có chắc chắn muốn xóa bước <strong id="deleteStepName"></strong>?</p>
+        <div class="modal-note">
+          Lưu ý: Nếu sau này tạo lại bước mới, hệ thống sẽ cấp một ID mới hoàn toàn và trạng thái đã tick của bước cũ sẽ không áp dụng cho bước mới.
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-secondary" type="button" id="deleteCancelBtn">Hủy</button>
+        <button class="btn-danger" type="button" id="deleteConfirmBtn">Xác nhận xóa</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="data/processData.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
