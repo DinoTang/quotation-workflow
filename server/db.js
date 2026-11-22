@@ -16,8 +16,17 @@ var DEFAULT_META = {
     "Dữ liệu nghiệp vụ hiện đang ở trạng thái Placeholder minh họa (dự kiến khoảng 7 bước sơ bộ). Tên bước, chủ trì, phối hợp, chứng từ và rủi ro sẽ được điền chính xác sau khi nhận tài liệu quy trình báo giá chính thức."
 };
 
+function cleanEnvString(val) {
+  if (typeof val !== "string") return "";
+  var s = val.trim();
+  if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
+    s = s.slice(1, -1).trim();
+  }
+  return s;
+}
+
 function getSupabaseServiceKey() {
-  return (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || "").trim();
+  return cleanEnvString(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY);
 }
 
 function isLegacyJwtKey(key) {
@@ -29,16 +38,25 @@ function useLocalDevStore() {
   return (
     process.env.QUOTATION_LOCAL_DEV_DB === "1" &&
     process.env.VERCEL !== "1" &&
-    (!process.env.SUPABASE_URL || !getSupabaseServiceKey())
+    (!cleanEnvString(process.env.SUPABASE_URL) || !getSupabaseServiceKey())
   );
 }
 
 function getSupabaseConfig() {
-  var url = (process.env.SUPABASE_URL || "").trim().replace(/\/+$/, "");
+  var rawUrl = cleanEnvString(process.env.SUPABASE_URL);
   var serviceKey = getSupabaseServiceKey();
-  if (!url || !serviceKey) {
+  if (!rawUrl || !serviceKey) {
     throw new Error("SUPABASE_NOT_CONFIGURED");
   }
+  if (rawUrl.includes("your-project-id.supabase.co")) {
+    throw new Error("SUPABASE_URL_IS_PLACEHOLDER");
+  }
+
+  var url = rawUrl.replace(/\/+$/, "");
+  if (!/^https?:\/\//i.test(url)) {
+    url = "https://" + url;
+  }
+
   if (serviceKey.startsWith("sb_publishable_")) {
     throw new Error("SUPABASE_PUBLISHABLE_KEY_NOT_ALLOWED");
   }
@@ -49,7 +67,8 @@ async function supabaseFetch(endpoint, options) {
   var cfg = getSupabaseConfig();
   var baseHeaders = {
     apikey: cfg.serviceKey,
-    "Content-Type": "application/json"
+    "Content-Type": "application/json",
+    "User-Agent": "QuotationWorkflow-Server/1.0"
   };
   if (isLegacyJwtKey(cfg.serviceKey)) {
     baseHeaders.Authorization = "Bearer " + cfg.serviceKey;
@@ -379,4 +398,72 @@ export async function reorderSteps(orderedIds) {
 
   var fresh = await getWorkflow();
   return { steps: fresh.steps };
+}
+
+export function formatSupabaseError(err, fallbackMessage) {
+  if (!err) return fallbackMessage;
+
+  var msg = String(err.message || err);
+
+  if (msg === "SUPABASE_NOT_CONFIGURED") {
+    return "Chưa cấu hình biến môi trường SUPABASE_URL hoặc SUPABASE_SERVICE_ROLE_KEY trên Vercel.";
+  }
+
+  if (msg === "SUPABASE_URL_IS_PLACEHOLDER") {
+    return "Biến môi trường SUPABASE_URL trên Vercel đang là giá trị placeholder mẫu ('your-project-id.supabase.co'). Vui lòng cập nhật URL project Supabase thật của bạn.";
+  }
+
+  if (msg === "SUPABASE_PUBLISHABLE_KEY_NOT_ALLOWED") {
+    return "Biến môi trường SUPABASE_SERVICE_ROLE_KEY trên Vercel đang dùng Publishable key thay vì Secret API Key. Vui lòng thay bằng Secret API Key (có tiền tố 'sb_secret_') trong Project Settings -> API Keys của Supabase.";
+  }
+
+  if (
+    msg.includes("PGRST204") ||
+    msg.includes("PGRST200") ||
+    msg.includes("42P01") ||
+    msg.includes("schema cache") ||
+    msg.includes("does not exist") ||
+    msg.includes("Could not find the table")
+  ) {
+    return "Cơ sở dữ liệu Supabase chưa được khởi tạo bảng (chưa có 'workflow_meta' hoặc 'workflow_steps'). Vui lòng mở Supabase Dashboard -> SQL Editor, dán nội dung file 'supabase/schema.sql' và nhấn RUN.";
+  }
+
+  if (
+    msg.includes("SUPABASE_ERROR_401") ||
+    msg.includes("Invalid API key") ||
+    msg.includes("JWT") ||
+    msg.includes("bad_jwt")
+  ) {
+    return "Supabase từ chối xác thực (401: Invalid API key). Vui lòng kiểm tra lại SUPABASE_SERVICE_ROLE_KEY trên Vercel (phải là Secret API Key sb_secret_... hoặc service_role key).";
+  }
+
+  if (
+    msg.includes("SUPABASE_ERROR_403") ||
+    msg.includes("row-level security") ||
+    msg.includes("violates row-level security")
+  ) {
+    return "Supabase từ chối quyền ghi (403: RLS policy). Key đang dùng không có quyền bypass RLS. Đảm bảo dùng đúng Secret API Key (sb_secret_...) trong SUPABASE_SERVICE_ROLE_KEY.";
+  }
+
+  if (
+    msg.includes("ENOTFOUND") ||
+    msg.includes("fetch failed") ||
+    msg.includes("ECONNREFUSED") ||
+    msg.includes("Failed to parse URL")
+  ) {
+    return "Không thể kết nối đến SUPABASE_URL. Vui lòng kiểm tra lại URL project Supabase trong biến môi trường Vercel (ví dụ: https://xxxx.supabase.co).";
+  }
+
+  if (msg.startsWith("SUPABASE_ERROR_")) {
+    var detail = msg.replace(/^SUPABASE_ERROR_\d+:\s*/, "");
+    try {
+      var parsed = JSON.parse(detail);
+      if (parsed && parsed.message) {
+        detail = parsed.message + (parsed.hint ? " (" + parsed.hint + ")" : "");
+      }
+    } catch (e) {}
+    return fallbackMessage + " [Chi tiết Supabase: " + detail.slice(0, 200) + "]";
+  }
+
+  return fallbackMessage + " (" + msg.slice(0, 150) + ")";
 }

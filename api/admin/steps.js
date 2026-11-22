@@ -1,5 +1,5 @@
 import { requireAdmin } from "../../server/auth.js";
-import { createStep, deleteStep, updateStep } from "../../server/db.js";
+import { createStep, deleteStep, formatSupabaseError, updateStep } from "../../server/db.js";
 import { getQueryParams, methodNotAllowed, readJsonBody, sendJson } from "../../server/http.js";
 import { isValidStepId, validateStepPayload } from "../../server/validation.js";
 
@@ -30,7 +30,8 @@ export default async function handler(req, res) {
       return sendJson(res, 200, { deletedId: delId });
     } catch (err) {
       console.error("[DELETE /api/admin/steps]", err && err.message);
-      return sendJson(res, 500, { error: "Không thể xóa bước khỏi cơ sở dữ liệu." });
+      var delErr = formatSupabaseError(err, "Không thể xóa bước khỏi cơ sở dữ liệu.");
+      return sendJson(res, 500, { error: delErr });
     }
   }
 
@@ -52,7 +53,8 @@ export default async function handler(req, res) {
       return sendJson(res, 201, { step: created });
     } catch (err) {
       console.error("[POST /api/admin/steps]", err && err.message);
-      return sendJson(res, 500, { error: "Không thể thêm bước mới vào cơ sở dữ liệu." });
+      var postErr = formatSupabaseError(err, "Không thể thêm bước mới vào cơ sở dữ liệu.");
+      return sendJson(res, 500, { error: postErr });
     }
   }
 
@@ -70,6 +72,7 @@ export default async function handler(req, res) {
     return sendJson(res, 200, { step: updated });
   } catch (err) {
     console.error("[PUT /api/admin/steps]", err && err.message);
-    return sendJson(res, 500, { error: "Không thể cập nhật thông tin bước." });
+    var putErr = formatSupabaseError(err, "Không thể cập nhật thông tin bước.");
+    return sendJson(res, 500, { error: putErr });
   }
 }

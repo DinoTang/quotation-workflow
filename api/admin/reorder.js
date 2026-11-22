@@ -1,5 +1,5 @@
 import { requireAdmin } from "../../server/auth.js";
-import { reorderSteps } from "../../server/db.js";
+import { formatSupabaseError, reorderSteps } from "../../server/db.js";
 import { methodNotAllowed, readJsonBody, sendJson } from "../../server/http.js";
 import { isValidStepId } from "../../server/validation.js";
 
@@ -35,6 +35,7 @@ export default async function handler(req, res) {
     return sendJson(res, 200, { steps: result.steps });
   } catch (err) {
     console.error("[PUT /api/admin/reorder]", err && err.message);
-    return sendJson(res, 500, { error: "Không thể lưu thứ tự bước mới." });
+    var reorderErr = formatSupabaseError(err, "Không thể lưu thứ tự bước mới.");
+    return sendJson(res, 500, { error: reorderErr });
   }
 }

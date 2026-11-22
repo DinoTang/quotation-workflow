@@ -1,5 +1,5 @@
 import { requireAdmin } from "../../server/auth.js";
-import { updateMeta } from "../../server/db.js";
+import { formatSupabaseError, updateMeta } from "../../server/db.js";
 import { methodNotAllowed, readJsonBody, sendJson } from "../../server/http.js";
 import { validateMetaPayload } from "../../server/validation.js";
 
@@ -26,6 +26,7 @@ export default async function handler(req, res) {
     return sendJson(res, 200, { meta: updated });
   } catch (err) {
     console.error("[PUT /api/admin/meta]", err && err.message);
-    return sendJson(res, 500, { error: "Không thể cập nhật thông tin chung của quy trình." });
+    var metaErr = formatSupabaseError(err, "Không thể cập nhật thông tin chung của quy trình.");
+    return sendJson(res, 500, { error: metaErr });
   }
 }
