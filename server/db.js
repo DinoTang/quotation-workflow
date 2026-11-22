@@ -42,6 +42,41 @@ function useLocalDevStore() {
   );
 }
 
+function normalizeSupabaseUrl(raw) {
+  var s = cleanEnvString(raw);
+  if (!s) return "";
+
+  // 1. Link dashboard từ trình duyệt: https://supabase.com/dashboard/project/<ref>
+  var dashMatch = s.match(/supabase\.com\/dashboard\/project\/([a-z0-9_-]+)/i);
+  if (dashMatch) {
+    return "https://" + dashMatch[1] + ".supabase.co";
+  }
+
+  // 2. Connection string postgresql://...
+  var pgMatch = s.match(/@(?:db\.)?([a-z0-9_-]+)\.supabase\.co/i) || s.match(/postgres\.([a-z0-9_-]+):/i);
+  if (pgMatch) {
+    return "https://" + pgMatch[1] + ".supabase.co";
+  }
+
+  // 3. Chuẩn hóa protocol (giữ http nếu là local test, mặc định https)
+  var isHttp = /^http:\/\/(?:127\.0\.0\.1|localhost)/i.test(s);
+  var proto = isHttp ? "http://" : "https://";
+  var withoutProto = s.replace(/^https?:\/\//i, "").replace(/\/+$/, "");
+
+  // 4. Bỏ phần đuôi /rest hoặc /rest/v1 nếu người dùng lỡ copy kèm
+  withoutProto = withoutProto.replace(/\/rest(?:\/v1)?\/?$/i, "");
+
+  // 5. Nếu bắt đầu bằng db.<ref>.supabase.co -> chuyển thành <ref>.supabase.co
+  withoutProto = withoutProto.replace(/^db\./i, "");
+
+  // 6. Nếu người dùng chỉ nhập Reference ID (không có dấu chấm nào, ví dụ 'abcdefghijklmnop')
+  if (!withoutProto.includes(".") && /^[a-z0-9_-]+$/i.test(withoutProto)) {
+    return proto + withoutProto + ".supabase.co";
+  }
+
+  return proto + withoutProto;
+}
+
 function getSupabaseConfig() {
   var rawUrl = cleanEnvString(process.env.SUPABASE_URL);
   var serviceKey = getSupabaseServiceKey();
@@ -52,10 +87,7 @@ function getSupabaseConfig() {
     throw new Error("SUPABASE_URL_IS_PLACEHOLDER");
   }
 
-  var url = rawUrl.replace(/\/+$/, "");
-  if (!/^https?:\/\//i.test(url)) {
-    url = "https://" + url;
-  }
+  var url = normalizeSupabaseUrl(rawUrl);
 
   if (serviceKey.startsWith("sb_publishable_")) {
     throw new Error("SUPABASE_PUBLISHABLE_KEY_NOT_ALLOWED");
@@ -451,7 +483,9 @@ export function formatSupabaseError(err, fallbackMessage) {
     msg.includes("ECONNREFUSED") ||
     msg.includes("Failed to parse URL")
   ) {
-    return "Không thể kết nối đến SUPABASE_URL. Vui lòng kiểm tra lại URL project Supabase trong biến môi trường Vercel (ví dụ: https://xxxx.supabase.co).";
+    var rawUrl = cleanEnvString(process.env.SUPABASE_URL);
+    var hostHint = rawUrl ? " [Giá trị SUPABASE_URL đang cài trên Vercel: '" + rawUrl.slice(0, 60) + "']" : "";
+    return "Không thể kết nối đến SUPABASE_URL" + hostHint + ". Vui lòng kiểm tra lại biến môi trường SUPABASE_URL trên Vercel (định dạng chuẩn phải là https://<project-ref>.supabase.co, lấy từ Supabase Dashboard -> Project Settings -> API / Data API).";
   }
 
   if (msg.startsWith("SUPABASE_ERROR_")) {
