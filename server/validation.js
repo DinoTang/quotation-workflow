@@ -31,33 +31,36 @@ function cleanTextOrList(val, maxItems, maxItemLen) {
   return DEFAULT_PLACEHOLDER;
 }
 
-function cleanRisks(val) {
+function cleanTasksOrRisks(val) {
   if (Array.isArray(val)) {
     var items = val
-      .map(function (entry) {
+      .map(function (entry, idx) {
         if (typeof entry === "string") {
-          var s = entry.trim().slice(0, 600);
-          return s ? { title: s, detail: "", solution: DEFAULT_PLACEHOLDER } : null;
+          var s = entry.trim().slice(0, 500);
+          return s && s !== DEFAULT_PLACEHOLDER
+            ? { id: "t" + (idx + 1), text: s, checked: false }
+            : null;
         }
         if (!entry || typeof entry !== "object") return null;
-        var title = cleanText(entry.title, 300, "");
-        var detail = cleanText(entry.detail, 1000, "");
-        var solution = cleanText(entry.solution, 1000, DEFAULT_PLACEHOLDER);
-        if (!title && !detail) return null;
+        // Hỗ trợ cả định dạng mới { id, text, checked } lẫn định dạng rủi ro cũ { title, detail, solution }
+        var text = cleanText(entry.text || entry.title, 500, "");
+        if (!text || text === DEFAULT_PLACEHOLDER) return null;
+        var checked = Boolean(entry.checked);
+        var id = cleanText(entry.id, 50, "t" + (idx + 1));
         return {
-          title: title || "Rủi ro phát sinh",
-          detail: detail,
-          solution: solution
+          id: id,
+          text: text,
+          checked: checked
         };
       })
       .filter(Boolean)
-      .slice(0, 30);
+      .slice(0, 50);
     return items.length > 0 ? items : DEFAULT_PLACEHOLDER;
   }
   if (typeof val === "string") {
     var trimmed = val.trim();
     if (!trimmed || trimmed === DEFAULT_PLACEHOLDER) return DEFAULT_PLACEHOLDER;
-    return [{ title: trimmed.slice(0, 300), detail: "", solution: DEFAULT_PLACEHOLDER }];
+    return [{ id: "t1", text: trimmed.slice(0, 500), checked: false }];
   }
   return DEFAULT_PLACEHOLDER;
 }
@@ -77,6 +80,8 @@ export function validateStepPayload(body) {
     return { error: "Vui lòng nhập mã / số thứ tự bước (ví dụ: Bước 01)." };
   }
 
+  var rawTasks = body.tasks !== undefined ? body.tasks : body.risks;
+
   return {
     data: {
       code: code,
@@ -87,7 +92,7 @@ export function validateStepPayload(body) {
       collaborators: cleanTextOrList(body.collaborators, 25, 300),
       inputs: cleanTextOrList(body.inputs, 40, 500),
       outputs: cleanTextOrList(body.outputs, 40, 500),
-      risks: cleanRisks(body.risks)
+      risks: cleanTasksOrRisks(rawTasks)
     }
   };
 }

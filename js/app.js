@@ -19,6 +19,7 @@
 
   var state = {
     completed: {},
+    taskProgress: {},
     persistentStorage: true,
     activeStepId: null,
     activeView: "ov",
@@ -583,25 +584,77 @@
     return "<p>" + escapeHtml(val) + "</p>";
   }
 
-  function renderRisksBlock(risks) {
-    if (!Array.isArray(risks) || risks.length === 0) {
-      return '<span class="missing-val">' + escapeHtml(PLACEHOLDER_VAL) + " (đang chờ tài liệu chính thức)</span>";
+  function isTaskDone(stepId, task, defaultChecked) {
+    if (state.taskProgress && state.taskProgress[stepId] && typeof state.taskProgress[stepId][task.id] === "boolean") {
+      return state.taskProgress[stepId][task.id];
     }
-    return risks.map(function (item) {
+    return Boolean(defaultChecked);
+  }
+
+  function setTaskDone(stepId, taskId, isDone) {
+    if (!state.taskProgress) {
+      state.taskProgress = {};
+    }
+    if (!state.taskProgress[stepId]) {
+      state.taskProgress[stepId] = {};
+    }
+    state.taskProgress[stepId][taskId] = Boolean(isDone);
+    if (storage && typeof storage.saveTaskChecklist === "function") {
+      storage.saveTaskChecklist(DATA.storageKey + "_tasks", state.taskProgress);
+    }
+  }
+
+  function renderTasksBlock(stepId, tasks) {
+    if (!Array.isArray(tasks) || tasks.length === 0) {
+      return '<p class="missing-val">' + escapeHtml(PLACEHOLDER_VAL) + " (chưa có danh sách công việc cần làm)</p>";
+    }
+
+    var validTasks = [];
+    tasks.forEach(function (item, idx) {
+      var taskId = "";
+      var text = "";
+      var defaultChecked = false;
+
       if (typeof item === "string") {
-        return '<div class="riskitem"><b>' + escapeHtml(item) + "</b></div>";
+        taskId = "task_" + idx;
+        text = item;
+      } else if (item && typeof item === "object") {
+        if (item.text !== undefined) {
+          taskId = item.id || ("task_" + idx);
+          text = item.text || "";
+          defaultChecked = Boolean(item.checked);
+        } else if (item.title !== undefined) {
+          taskId = item.id || ("task_" + idx);
+          text = item.title + (item.detail ? " - " + item.detail : "") + (item.solution ? " (Xử lý: " + item.solution + ")" : "");
+          defaultChecked = false;
+        }
       }
-      var title = item.title ? escapeHtml(item.title) : "Rủi ro phát sinh";
-      var detail = item.detail ? escapeHtml(item.detail) : "";
-      var solution = item.solution ? escapeHtml(item.solution) : PLACEHOLDER_VAL;
-      return (
-        '<div class="riskitem">' +
-          "<b>" + title + "</b>" +
-          (detail ? "<span>" + detail + "</span>" : "") +
-          "<em>" + solution + "</em>" +
-        "</div>"
-      );
-    }).join("");
+
+      if (text && text.trim()) {
+        validTasks.push({ id: taskId, text: text, defaultChecked: defaultChecked });
+      }
+    });
+
+    if (validTasks.length === 0) {
+      return '<p class="missing-val">' + escapeHtml(PLACEHOLDER_VAL) + " (chưa có danh sách công việc cần làm)</p>";
+    }
+
+    var html = '<ul class="task-checklist" data-step-id="' + escapeHtml(stepId) + '">';
+    validTasks.forEach(function (task) {
+      var done = isTaskDone(stepId, task, task.defaultChecked);
+      var checkboxId = "task_" + escapeHtml(stepId) + "_" + escapeHtml(task.id);
+
+      html +=
+        '<li class="task-item' + (done ? " is-done" : "") + '" data-task-id="' + escapeHtml(task.id) + '">' +
+          '<label class="task-label" for="' + checkboxId + '">' +
+            '<input type="checkbox" class="task-checkbox" id="' + checkboxId + '" data-step-id="' + escapeHtml(stepId) + '" data-task-id="' + escapeHtml(task.id) + '"' + (done ? " checked" : "") + ' />' +
+            '<span class="task-custom-checkbox" aria-hidden="true"></span>' +
+            '<span class="task-text">' + escapeHtml(task.text) + "</span>" +
+          "</label>" +
+        "</li>";
+    });
+    html += "</ul>";
+    return html;
   }
 
   function renderPanel(stepId, resetScroll) {
@@ -646,15 +699,15 @@
           "</dl>" +
         "</div>" +
         '<div class="sec">' +
-          "<h4>3. Chứng từ đầu vào → Kết quả đầu ra</h4>" +
+          "<h4>3. Thông tin / Chứng từ đầu vào → Kết quả đầu ra</h4>" +
           '<div class="io">' +
-            '<div class="iobox in"><h5>Chứng từ / Tài liệu đầu vào</h5>' + renderFieldContent(step.inputs) + "</div>" +
+            '<div class="iobox in"><h5>Thông tin / Chứng từ đầu vào</h5>' + renderFieldContent(step.inputs) + "</div>" +
             '<div class="iobox out"><h5>Kết quả / Chứng từ đầu ra</h5>' + renderFieldContent(step.outputs) + "</div>" +
           "</div>" +
         "</div>" +
         '<div class="sec">' +
-          "<h4>4. Rủi ro phát sinh &amp; Cách giải quyết</h4>" +
-          renderRisksBlock(step.risks) +
+          "<h4>4. Những công việc cần làm</h4>" +
+          renderTasksBlock(step.id, step.risks) +
         "</div>" +
       "</div>" +
       '<div class="pfoot">' +
@@ -694,6 +747,18 @@
         openStep(nextStep.id);
       });
     }
+
+    var taskCheckboxes = dom.panelInner.querySelectorAll(".task-checkbox");
+    Array.prototype.slice.call(taskCheckboxes).forEach(function (chk) {
+      chk.addEventListener("change", function () {
+        var tId = chk.dataset.taskId;
+        setTaskDone(stepId, tId, chk.checked);
+        var itemEl = chk.closest(".task-item");
+        if (itemEl) {
+          itemEl.classList.toggle("is-done", chk.checked);
+        }
+      });
+    });
 
     if (resetScroll) {
       var bodyEl = dom.panelInner.querySelector(".pbody");
@@ -737,7 +802,7 @@
       '<div class="empty">' +
         '<span class="big" aria-hidden="true">◇</span>' +
         "Chọn một bước trong quy trình báo giá để xem hướng dẫn công việc, đơn vị phối hợp, " +
-        "chứng từ đầu vào/đầu ra và cách xử lý rủi ro." +
+        "thông tin / chứng từ và danh sách công việc cần làm." +
       "</div>";
 
     renderAllStepsAndFlow();
@@ -825,6 +890,7 @@
 
   function confirmClearAll() {
     state.completed = {};
+    state.taskProgress = {};
     storage.clearProgress(DATA.storageKey);
     closeClearModal(false);
 
@@ -970,6 +1036,9 @@
     var loaded = storage.loadProgress(DATA.storageKey, stepIds);
     state.completed = loaded.completed;
     state.persistentStorage = loaded.persistent;
+    if (storage && typeof storage.loadTaskChecklist === "function") {
+      state.taskProgress = storage.loadTaskChecklist(DATA.storageKey + "_tasks");
+    }
 
     if (state.activeStepId && !getStepById(state.activeStepId)) {
       closePanel();

@@ -70,6 +70,33 @@
     }
     try {
       global.localStorage.removeItem(storageKey);
+      global.localStorage.removeItem(storageKey + "_tasks");
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  function loadTaskChecklist(taskStorageKey) {
+    if (!checkStorageAvailable()) {
+      return {};
+    }
+    try {
+      var raw = global.localStorage.getItem(taskStorageKey);
+      if (!raw) return {};
+      var parsed = JSON.parse(raw);
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch (err) {
+      return {};
+    }
+  }
+
+  function saveTaskChecklist(taskStorageKey, taskMap) {
+    if (!checkStorageAvailable()) {
+      return false;
+    }
+    try {
+      global.localStorage.setItem(taskStorageKey, JSON.stringify(taskMap || {}));
       return true;
     } catch (err) {
       return false;
@@ -109,6 +136,8 @@
     isAvailable: checkStorageAvailable,
     loadProgress: loadProgress,
     saveProgress: saveProgress,
+    loadTaskChecklist: loadTaskChecklist,
+    saveTaskChecklist: saveTaskChecklist,
     clearProgress: clearProgress,
     loadTheme: loadTheme,
     saveTheme: saveTheme
