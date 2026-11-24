@@ -584,6 +584,33 @@
     return "<p>" + escapeHtml(val) + "</p>";
   }
 
+  function renderRisksBlock(risks) {
+    if (!risks || risks === PLACEHOLDER_VAL) {
+      return '<span class="missing-val">' + escapeHtml(PLACEHOLDER_VAL) + " (đang chờ tài liệu chính thức)</span>";
+    }
+    if (typeof risks === "string") {
+      return '<div class="riskitem"><b>' + escapeHtml(risks) + "</b></div>";
+    }
+    if (!Array.isArray(risks) || risks.length === 0) {
+      return '<span class="missing-val">' + escapeHtml(PLACEHOLDER_VAL) + " (đang chờ tài liệu chính thức)</span>";
+    }
+    return risks.map(function (item) {
+      if (typeof item === "string") {
+        return '<div class="riskitem"><b>' + escapeHtml(item) + "</b></div>";
+      }
+      var title = item.title ? escapeHtml(item.title) : "Rủi ro phát sinh";
+      var detail = item.detail ? escapeHtml(item.detail) : "";
+      var solution = item.solution ? escapeHtml(item.solution) : PLACEHOLDER_VAL;
+      return (
+        '<div class="riskitem">' +
+          "<b>" + title + "</b>" +
+          (detail ? "<span>" + detail + "</span>" : "") +
+          "<em>" + solution + "</em>" +
+        "</div>"
+      );
+    }).join("");
+  }
+
   function isTaskDone(stepId, task, defaultChecked) {
     if (state.taskProgress && state.taskProgress[stepId] && typeof state.taskProgress[stepId][task.id] === "boolean") {
       return state.taskProgress[stepId][task.id];
@@ -630,7 +657,7 @@
         }
       }
 
-      if (text && text.trim()) {
+      if (text && text.trim() && text !== PLACEHOLDER_VAL) {
         validTasks.push({ id: taskId, text: text, defaultChecked: defaultChecked });
       }
     });
@@ -705,9 +732,21 @@
             '<div class="iobox out"><h5>Kết quả / Chứng từ đầu ra</h5>' + renderFieldContent(step.outputs) + "</div>" +
           "</div>" +
         "</div>" +
-        '<div class="sec">' +
-          "<h4>4. Những công việc cần làm</h4>" +
-          renderTasksBlock(step.id, step.risks) +
+        '<div class="sec sec-risks">' +
+          '<div class="sec-head">' +
+            "<h4>4. Rủi ro phát sinh &amp; Cách giải quyết</h4>" +
+            '<button type="button" class="sec-toggle-btn" id="toggleRisksBtn" aria-expanded="true" title="Thu gọn hoặc mở rộng mục rủi ro">' +
+              '<span class="sec-toggle-text">Thu gọn</span>' +
+              '<span class="sec-toggle-icon" aria-hidden="true">▲</span>' +
+            "</button>" +
+          "</div>" +
+          '<div class="sec-collapsible" id="risksCollapsible">' +
+            renderRisksBlock(step.risks) +
+          "</div>" +
+        "</div>" +
+        '<div class="sec sec-tasks">' +
+          "<h4>5. Những công việc cần làm</h4>" +
+          renderTasksBlock(step.id, step.tasks) +
         "</div>" +
       "</div>" +
       '<div class="pfoot">' +
@@ -745,6 +784,21 @@
     if (nextStep) {
       nextBtn.addEventListener("click", function () {
         openStep(nextStep.id);
+      });
+    }
+
+    var toggleRisksBtn = document.getElementById("toggleRisksBtn");
+    var risksCollapsible = document.getElementById("risksCollapsible");
+    if (toggleRisksBtn && risksCollapsible) {
+      toggleRisksBtn.addEventListener("click", function () {
+        var isExpanded = toggleRisksBtn.getAttribute("aria-expanded") === "true";
+        var nextState = !isExpanded;
+        toggleRisksBtn.setAttribute("aria-expanded", String(nextState));
+        risksCollapsible.classList.toggle("is-collapsed", !nextState);
+        var txt = toggleRisksBtn.querySelector(".sec-toggle-text");
+        var icon = toggleRisksBtn.querySelector(".sec-toggle-icon");
+        if (txt) txt.textContent = nextState ? "Thu gọn" : "Mở rộng";
+        if (icon) icon.textContent = nextState ? "▲" : "▼";
       });
     }
 
@@ -802,7 +856,7 @@
       '<div class="empty">' +
         '<span class="big" aria-hidden="true">◇</span>' +
         "Chọn một bước trong quy trình báo giá để xem hướng dẫn công việc, đơn vị phối hợp, " +
-        "thông tin / chứng từ và danh sách công việc cần làm." +
+        "thông tin / chứng từ, rủi ro phát sinh & cách giải quyết và danh sách công việc cần làm." +
       "</div>";
 
     renderAllStepsAndFlow();

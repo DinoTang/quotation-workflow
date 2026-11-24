@@ -31,7 +31,38 @@ function cleanTextOrList(val, maxItems, maxItemLen) {
   return DEFAULT_PLACEHOLDER;
 }
 
-function cleanTasksOrRisks(val) {
+export function cleanRisks(val) {
+  if (Array.isArray(val)) {
+    var items = val
+      .map(function (entry) {
+        if (typeof entry === "string") {
+          var s = entry.trim().slice(0, 400);
+          return s && s !== DEFAULT_PLACEHOLDER ? { title: s, detail: "", solution: "" } : null;
+        }
+        if (!entry || typeof entry !== "object") return null;
+        var title = cleanText(entry.title, 160, "");
+        var detail = cleanText(entry.detail, 400, "");
+        var solution = cleanText(entry.solution, 400, "");
+        if (!title && !detail && !solution) return null;
+        return {
+          title: title || "Rủi ro phát sinh",
+          detail: detail,
+          solution: solution || DEFAULT_PLACEHOLDER
+        };
+      })
+      .filter(Boolean)
+      .slice(0, 30);
+    return items.length > 0 ? items : DEFAULT_PLACEHOLDER;
+  }
+  if (typeof val === "string") {
+    var trimmed = val.trim();
+    if (!trimmed || trimmed === DEFAULT_PLACEHOLDER) return DEFAULT_PLACEHOLDER;
+    return trimmed.slice(0, 500);
+  }
+  return DEFAULT_PLACEHOLDER;
+}
+
+export function cleanTasks(val) {
   if (Array.isArray(val)) {
     var items = val
       .map(function (entry, idx) {
@@ -42,27 +73,20 @@ function cleanTasksOrRisks(val) {
             : null;
         }
         if (!entry || typeof entry !== "object") return null;
-        // Hỗ trợ cả định dạng mới { id, text, checked } lẫn định dạng rủi ro cũ { title, detail, solution }
-        var text = cleanText(entry.text || entry.title, 500, "");
+        var text = cleanText(entry.text, 500, "");
         if (!text || text === DEFAULT_PLACEHOLDER) return null;
-        var checked = Boolean(entry.checked);
         var id = cleanText(entry.id, 50, "t" + (idx + 1));
         return {
           id: id,
           text: text,
-          checked: checked
+          checked: Boolean(entry.checked)
         };
       })
       .filter(Boolean)
       .slice(0, 50);
-    return items.length > 0 ? items : DEFAULT_PLACEHOLDER;
+    return items;
   }
-  if (typeof val === "string") {
-    var trimmed = val.trim();
-    if (!trimmed || trimmed === DEFAULT_PLACEHOLDER) return DEFAULT_PLACEHOLDER;
-    return [{ id: "t1", text: trimmed.slice(0, 500), checked: false }];
-  }
-  return DEFAULT_PLACEHOLDER;
+  return [];
 }
 
 export function validateStepPayload(body) {
@@ -80,8 +104,6 @@ export function validateStepPayload(body) {
     return { error: "Vui lòng nhập mã / số thứ tự bước (ví dụ: Bước 01)." };
   }
 
-  var rawTasks = body.tasks !== undefined ? body.tasks : body.risks;
-
   return {
     data: {
       code: code,
@@ -92,7 +114,8 @@ export function validateStepPayload(body) {
       collaborators: cleanTextOrList(body.collaborators, 25, 300),
       inputs: cleanTextOrList(body.inputs, 40, 500),
       outputs: cleanTextOrList(body.outputs, 40, 500),
-      risks: cleanTasksOrRisks(rawTasks)
+      risks: cleanRisks(body.risks),
+      tasks: cleanTasks(body.tasks)
     }
   };
 }

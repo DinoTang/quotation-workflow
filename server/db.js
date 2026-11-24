@@ -164,6 +164,35 @@ function mapMetaToDb(meta) {
 }
 
 function mapStepFromDb(row) {
+  var risksVal = "Chưa được cung cấp";
+  var tasksVal = [];
+
+  if (row.risks !== undefined && row.risks !== null) {
+    if (typeof row.risks === "object" && !Array.isArray(row.risks)) {
+      if (row.risks.risks !== undefined || row.risks.tasks !== undefined) {
+        risksVal = row.risks.risks !== undefined ? row.risks.risks : "Chưa được cung cấp";
+        tasksVal = Array.isArray(row.risks.tasks) ? row.risks.tasks : [];
+      } else {
+        risksVal = row.risks;
+      }
+    } else if (Array.isArray(row.risks)) {
+      var hasTaskItem = row.risks.some(function (it) { return it && it.text !== undefined; });
+      if (hasTaskItem) {
+        tasksVal = row.risks;
+        risksVal = "Chưa được cung cấp";
+      } else {
+        risksVal = row.risks;
+        tasksVal = [];
+      }
+    } else {
+      risksVal = row.risks;
+    }
+  }
+
+  if (row.tasks !== undefined && Array.isArray(row.tasks)) {
+    tasksVal = row.tasks;
+  }
+
   return {
     id: row.id,
     order: Number(row.sort_order),
@@ -175,7 +204,8 @@ function mapStepFromDb(row) {
     collaborators: row.collaborators !== undefined ? row.collaborators : "Chưa được cung cấp",
     inputs: row.inputs !== undefined ? row.inputs : "Chưa được cung cấp",
     outputs: row.outputs !== undefined ? row.outputs : "Chưa được cung cấp",
-    risks: row.risks !== undefined ? row.risks : "Chưa được cung cấp",
+    risks: risksVal,
+    tasks: tasksVal,
     updatedAt: row.updated_at || null
   };
 }
@@ -204,6 +234,7 @@ function createInitialLocalDb() {
       inputs: "Chưa được cung cấp",
       outputs: "Chưa được cung cấp",
       risks: "Chưa được cung cấp",
+      tasks: [],
       updatedAt: new Date().toISOString()
     });
   }
@@ -305,7 +336,10 @@ export async function createStep(stepData) {
       collaborators: stepData.collaborators,
       inputs: stepData.inputs,
       outputs: stepData.outputs,
-      risks: stepData.risks,
+      risks: {
+        risks: stepData.risks !== undefined ? stepData.risks : "Chưa được cung cấp",
+        tasks: Array.isArray(stepData.tasks) ? stepData.tasks : []
+      },
       created_at: now,
       updated_at: now
     }
@@ -340,7 +374,10 @@ export async function updateStep(stepId, stepData) {
       collaborators: stepData.collaborators,
       inputs: stepData.inputs,
       outputs: stepData.outputs,
-      risks: stepData.risks,
+      risks: {
+        risks: stepData.risks !== undefined ? stepData.risks : "Chưa được cung cấp",
+        tasks: Array.isArray(stepData.tasks) ? stepData.tasks : []
+      },
       updated_at: new Date().toISOString()
     }
   });

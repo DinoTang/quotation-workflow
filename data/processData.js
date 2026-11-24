@@ -44,7 +44,8 @@
       collaborators: PLACEHOLDER_TEXT,
       inputs: PLACEHOLDER_TEXT,
       outputs: PLACEHOLDER_TEXT,
-      risks: PLACEHOLDER_TEXT
+      risks: PLACEHOLDER_TEXT,
+      tasks: []
     };
   }
 

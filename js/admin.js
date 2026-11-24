@@ -56,6 +56,9 @@
     stepCollabInput: document.getElementById("stepCollabInput"),
     stepInputsInput: document.getElementById("stepInputsInput"),
     stepOutputsInput: document.getElementById("stepOutputsInput"),
+    toggleAdminRisksBtn: document.getElementById("toggleAdminRisksBtn"),
+    addRiskRowBtn: document.getElementById("addRiskRowBtn"),
+    stepRisksList: document.getElementById("stepRisksList"),
     addTaskRowBtn: document.getElementById("addTaskRowBtn"),
     stepTasksList: document.getElementById("stepTasksList"),
     stepEditorError: document.getElementById("stepEditorError"),
@@ -265,7 +268,8 @@
       card.className = "admin-step-card";
       card.dataset.stepId = step.id;
 
-      var taskCount = Array.isArray(step.risks) ? step.risks.length : 0;
+      var riskCount = Array.isArray(step.risks) ? step.risks.length : 0;
+      var taskCount = Array.isArray(step.tasks) ? step.tasks.length : 0;
       var draftBadge = step.isPlaceholder
         ? '<span class="admin-badge-draft">Placeholder minh họa</span>'
         : "";
@@ -282,7 +286,8 @@
           '<p class="admin-step-desc">' + escapeHtml(summarizeField(step.description)) + "</p>" +
           '<div class="admin-step-meta">' +
             "<span>Chủ trì: <strong>" + escapeHtml(summarizeField(step.lead)) + "</strong></span>" +
-            "<span>Công việc cần làm: <strong>" + (taskCount > 0 ? taskCount + " mục" : DEFAULT_PLACEHOLDER) + "</strong></span>" +
+            "<span>Rủi ro: <strong>" + (riskCount > 0 ? riskCount + " mục" : DEFAULT_PLACEHOLDER) + "</strong></span>" +
+            "<span>Công việc: <strong>" + (taskCount > 0 ? taskCount + " mục" : DEFAULT_PLACEHOLDER) + "</strong></span>" +
           "</div>" +
         "</div>" +
         '<div class="admin-step-actions">' +
@@ -329,7 +334,95 @@
   }
 
   /* --------------------------------------------------------------------------
-     TASK / CHECKLIST ROWS BUILDER IN STEP MODAL
+     RISK ROWS BUILDER IN STEP MODAL (MỤC 4)
+     -------------------------------------------------------------------------- */
+  function appendRiskRow(entry) {
+    var risk = entry || {};
+    var titleVal = risk.title || (typeof risk === "string" ? risk : "");
+    if (titleVal === DEFAULT_PLACEHOLDER) titleVal = "";
+    var detailVal = risk.detail || "";
+    if (detailVal === DEFAULT_PLACEHOLDER) detailVal = "";
+    var solutionVal = risk.solution || "";
+    if (solutionVal === DEFAULT_PLACEHOLDER) solutionVal = "";
+
+    var row = document.createElement("div");
+    row.className = "admin-risk-row";
+    row.innerHTML =
+      '<div class="admin-risk-col">' +
+        '<label class="admin-sublabel">Tên rủi ro *</label>' +
+        '<input class="admin-input step-risk-title" type="text" maxlength="160" placeholder="Ví dụ: Chậm tiến độ báo giá..." value="' + escapeHtml(titleVal) + '">' +
+      '</div>' +
+      '<div class="admin-risk-col">' +
+        '<label class="admin-sublabel">Mô tả tình huống</label>' +
+        '<input class="admin-input step-risk-detail" type="text" maxlength="400" placeholder="Chi tiết hoặc nguyên nhân..." value="' + escapeHtml(detailVal) + '">' +
+      '</div>' +
+      '<div class="admin-risk-col">' +
+        '<label class="admin-sublabel">Phương án giải quyết</label>' +
+        '<input class="admin-input step-risk-solution" type="text" maxlength="400" placeholder="Cách khắc phục..." value="' + escapeHtml(solutionVal) + '">' +
+      '</div>' +
+      '<div class="admin-risk-col-action">' +
+        '<button class="admin-icon-btn is-danger admin-risk-remove-btn" type="button" data-action="remove-risk" title="Xóa rủi ro này">✕ Xóa</button>' +
+      '</div>';
+
+    row.querySelector('[data-action="remove-risk"]').addEventListener("click", function () {
+      if (row.parentNode) row.parentNode.removeChild(row);
+      syncEmptyRisksHint();
+    });
+
+    dom.stepRisksList.appendChild(row);
+    return row;
+  }
+
+  function syncEmptyRisksHint() {
+    var existingHint = dom.stepRisksList.querySelector(".admin-risk-empty-hint");
+    var hasRows = dom.stepRisksList.querySelectorAll(".admin-risk-row").length > 0;
+    if (hasRows && existingHint) {
+      existingHint.parentNode.removeChild(existingHint);
+    } else if (!hasRows && !existingHint) {
+      var hint = document.createElement("p");
+      hint.className = "admin-hint admin-risk-empty-hint";
+      hint.textContent = "Chưa có rủi ro nào. Nhấn \"+ Thêm rủi ro\" để bổ sung rủi ro và biện pháp xử lý cho bước này.";
+      dom.stepRisksList.appendChild(hint);
+    }
+  }
+
+  function renderRiskRows(risks) {
+    dom.stepRisksList.innerHTML = "";
+    if (Array.isArray(risks) && risks.length > 0) {
+      risks.forEach(function (item) {
+        if (typeof item === "string") {
+          if (item !== DEFAULT_PLACEHOLDER) {
+            appendRiskRow({ title: item, detail: "", solution: "" });
+          }
+        } else if (item && typeof item === "object") {
+          appendRiskRow(item);
+        }
+      });
+    } else if (typeof risks === "string" && risks.trim() && risks !== DEFAULT_PLACEHOLDER) {
+      appendRiskRow({ title: risks.trim(), detail: "", solution: "" });
+    }
+    syncEmptyRisksHint();
+  }
+
+  function collectRiskRows() {
+    var rows = Array.prototype.slice.call(dom.stepRisksList.querySelectorAll(".admin-risk-row"));
+    var items = [];
+    rows.forEach(function (row) {
+      var title = row.querySelector(".step-risk-title").value.trim();
+      var detail = row.querySelector(".step-risk-detail").value.trim();
+      var solution = row.querySelector(".step-risk-solution").value.trim();
+      if (!title && !detail && !solution) return;
+      items.push({
+        title: title || "Rủi ro phát sinh",
+        detail: detail,
+        solution: solution || DEFAULT_PLACEHOLDER
+      });
+    });
+    return items.length > 0 ? items : DEFAULT_PLACEHOLDER;
+  }
+
+  /* --------------------------------------------------------------------------
+     TASK / CHECKLIST ROWS BUILDER IN STEP MODAL (MỤC 5)
      -------------------------------------------------------------------------- */
   function appendTaskRow(entry) {
     var task = entry || {};
@@ -424,7 +517,8 @@
       dom.stepCollabInput.value = fieldValueToText(step.collaborators);
       dom.stepInputsInput.value = fieldValueToText(step.inputs);
       dom.stepOutputsInput.value = fieldValueToText(step.outputs);
-      renderTaskRows(step.risks);
+      renderRiskRows(step.risks);
+      renderTaskRows(step.tasks);
     } else {
       var nextNum = state.steps.length + 1;
       dom.stepModalTitle.textContent = "Thêm bước quy trình mới";
@@ -437,6 +531,7 @@
       dom.stepCollabInput.value = "";
       dom.stepInputsInput.value = "";
       dom.stepOutputsInput.value = "";
+      renderRiskRows([]);
       renderTaskRows([]);
     }
 
@@ -590,7 +685,8 @@
       collaborators: textToFieldValue(dom.stepCollabInput.value),
       inputs: textToFieldValue(dom.stepInputsInput.value),
       outputs: textToFieldValue(dom.stepOutputsInput.value),
-      risks: collectTaskRows()
+      risks: collectRiskRows(),
+      tasks: collectTaskRows()
     };
 
     if (!payload.code || !payload.title) {
@@ -665,6 +761,26 @@
     });
     dom.metaForm.addEventListener("submit", handleMetaSubmit);
     dom.stepEditorForm.addEventListener("submit", handleStepSubmit);
+    if (dom.addRiskRowBtn) {
+      dom.addRiskRowBtn.addEventListener("click", function () {
+        var row = appendRiskRow({ title: "", detail: "", solution: "" });
+        syncEmptyRisksHint();
+        var input = row.querySelector(".step-risk-title");
+        if (input) input.focus();
+      });
+    }
+    if (dom.toggleAdminRisksBtn) {
+      dom.toggleAdminRisksBtn.addEventListener("click", function () {
+        var isExpanded = dom.toggleAdminRisksBtn.getAttribute("aria-expanded") === "true";
+        var nextState = !isExpanded;
+        dom.toggleAdminRisksBtn.setAttribute("aria-expanded", String(nextState));
+        dom.stepRisksList.classList.toggle("is-collapsed", !nextState);
+        var txt = dom.toggleAdminRisksBtn.querySelector(".toggle-text");
+        var icon = dom.toggleAdminRisksBtn.querySelector(".toggle-icon");
+        if (txt) txt.textContent = nextState ? "Thu gọn" : "Mở rộng";
+        if (icon) icon.textContent = nextState ? "▲" : "▼";
+      });
+    }
     dom.addTaskRowBtn.addEventListener("click", function () {
       var row = appendTaskRow({ text: "", checked: false });
       syncEmptyTasksHint();
