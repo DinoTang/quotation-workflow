@@ -434,6 +434,8 @@
 
       var card = document.createElement("article");
       card.id = "flow-node-" + step.id;
+      card.dataset.stepOrder = String(step.order);
+      card.dataset.stepCode = step.code;
       card.className = "node" + (done ? " is-done" : "") + (isActive ? " is-active" : "");
       card.style.gridColumn = String(colIndex);
       card.style.setProperty("--phc", color);
@@ -487,10 +489,61 @@
       card.appendChild(top);
       card.appendChild(openBtn);
       row.appendChild(card);
+
+      if (Number(step.order) === 6) {
+        var branchMobile = document.createElement("div");
+        branchMobile.className = "flow-branch-mobile";
+        branchMobile.innerHTML =
+          '<div class="branch-pill is-pass">' +
+            '<span class="branch-tag">Đạt →</span>' +
+            '<span>Chuyển sang Bước 07</span>' +
+          '</div>' +
+          '<div class="branch-pill is-fail">' +
+            '<span class="branch-tag">↵ Không đạt</span>' +
+            '<span>Quay lại Bước 05</span>' +
+          '</div>';
+        row.appendChild(branchMobile);
+      }
+
       dom.flowCanvas.appendChild(row);
     });
 
     scheduleWireRedraw();
+  }
+
+  function createSvgBadge(text, x, y, type) {
+    var isPass = type === "pass";
+    var strokeColor = isPass ? "var(--pass)" : "var(--risk)";
+    var softBg = isPass ? "var(--pass-soft)" : "var(--risk-soft)";
+    var badgeW = isPass ? 52 : 86;
+    var badgeH = 22;
+
+    var g = document.createElementNS(SVG_NS, "g");
+    g.setAttribute("class", "wire-badge " + (isPass ? "badge-pass" : "badge-fail"));
+    g.setAttribute("transform", "translate(" + x + "," + y + ")");
+
+    var rect = document.createElementNS(SVG_NS, "rect");
+    rect.setAttribute("x", String(-badgeW / 2));
+    rect.setAttribute("y", String(-badgeH / 2));
+    rect.setAttribute("width", String(badgeW));
+    rect.setAttribute("height", String(badgeH));
+    rect.setAttribute("rx", String(badgeH / 2));
+    rect.setAttribute("fill", softBg);
+    rect.setAttribute("stroke", strokeColor);
+    rect.setAttribute("stroke-width", "1.6");
+
+    var txt = document.createElementNS(SVG_NS, "text");
+    txt.setAttribute("text-anchor", "middle");
+    txt.setAttribute("dominant-baseline", "central");
+    txt.setAttribute("fill", strokeColor);
+    txt.setAttribute("font-size", "11");
+    txt.setAttribute("font-weight", "800");
+    txt.setAttribute("font-family", "var(--sans)");
+    txt.textContent = text;
+
+    g.appendChild(rect);
+    g.appendChild(txt);
+    return g;
   }
 
   function drawWires() {
@@ -508,6 +561,8 @@
     dom.wires.setAttribute("viewBox", "0 0 " + width + " " + height);
 
     var defs = document.createElementNS(SVG_NS, "defs");
+
+    // 1. Mũi tên xám mặc định
     var marker = document.createElementNS(SVG_NS, "marker");
     marker.setAttribute("id", "flowArrow");
     marker.setAttribute("viewBox", "0 0 12 12");
@@ -515,16 +570,51 @@
     marker.setAttribute("refY", "6");
     marker.setAttribute("markerWidth", "10");
     marker.setAttribute("markerHeight", "10");
-    marker.setAttribute("orient", "auto-start-reverse");
-
+    marker.setAttribute("orient", "auto");
     var arrowPath = document.createElementNS(SVG_NS, "path");
     arrowPath.setAttribute("d", "M1,1 L11,6 L1,11 L3.5,6 z");
     arrowPath.setAttribute("fill", "var(--rule-strong)");
     marker.appendChild(arrowPath);
     defs.appendChild(marker);
+
+    // 2. Mũi tên xanh lá khi "Đạt" (Bước 06 -> Bước 07)
+    var markerGreen = document.createElementNS(SVG_NS, "marker");
+    markerGreen.setAttribute("id", "flowArrowGreen");
+    markerGreen.setAttribute("viewBox", "0 0 12 12");
+    markerGreen.setAttribute("refX", "10.5");
+    markerGreen.setAttribute("refY", "6");
+    markerGreen.setAttribute("markerWidth", "10");
+    markerGreen.setAttribute("markerHeight", "10");
+    markerGreen.setAttribute("orient", "auto");
+    var arrowPathGreen = document.createElementNS(SVG_NS, "path");
+    arrowPathGreen.setAttribute("d", "M1,1 L11,6 L1,11 L3.5,6 z");
+    arrowPathGreen.setAttribute("fill", "var(--pass)");
+    markerGreen.appendChild(arrowPathGreen);
+    defs.appendChild(markerGreen);
+
+    // 3. Mũi tên đỏ khi "Không đạt" (Bước 06 quay lại Bước 05)
+    var markerRed = document.createElementNS(SVG_NS, "marker");
+    markerRed.setAttribute("id", "flowArrowRed");
+    markerRed.setAttribute("viewBox", "0 0 12 12");
+    markerRed.setAttribute("refX", "10.5");
+    markerRed.setAttribute("refY", "6");
+    markerRed.setAttribute("markerWidth", "10");
+    markerRed.setAttribute("markerHeight", "10");
+    markerRed.setAttribute("orient", "auto");
+    var arrowPathRed = document.createElementNS(SVG_NS, "path");
+    arrowPathRed.setAttribute("d", "M1,1 L11,6 L1,11 L3.5,6 z");
+    arrowPathRed.setAttribute("fill", "var(--risk)");
+    markerRed.appendChild(arrowPathRed);
+    defs.appendChild(markerRed);
+
     dom.wires.appendChild(defs);
 
+    // Vẽ các luồng tiến tuần tự
     for (var i = 0; i < nodes.length - 1; i++) {
+      var orderA = Number(nodes[i].dataset.stepOrder || (i + 1));
+      var orderB = Number(nodes[i + 1].dataset.stepOrder || (i + 2));
+      var isPassBranch = (orderA === 6 && orderB === 7);
+
       var rectA = nodes[i].getBoundingClientRect();
       var rectB = nodes[i + 1].getBoundingClientRect();
 
@@ -538,26 +628,82 @@
         ? "M" + ax + "," + ay + " L" + bx + "," + by
         : "M" + ax + "," + ay + " L" + ax + "," + midY + " L" + bx + "," + midY + " L" + bx + "," + by;
 
+      var baseColor = isPassBranch ? "var(--pass)" : "var(--rule-strong)";
+      var pulseColor = isPassBranch ? "var(--pass)" : "var(--accent)";
+      var markerName = isPassBranch ? "url(#flowArrowGreen)" : "url(#flowArrow)";
+
       var basePath = document.createElementNS(SVG_NS, "path");
       basePath.setAttribute("d", d);
       basePath.setAttribute("fill", "none");
-      basePath.setAttribute("stroke", "var(--rule-strong)");
-      basePath.setAttribute("stroke-width", "2.6");
+      basePath.setAttribute("stroke", baseColor);
+      basePath.setAttribute("stroke-width", isPassBranch ? "2.8" : "2.6");
       basePath.setAttribute("stroke-linejoin", "round");
       basePath.setAttribute("stroke-linecap", "round");
-      basePath.setAttribute("marker-end", "url(#flowArrow)");
-      basePath.setAttribute("class", "wire-base");
+      basePath.setAttribute("marker-end", markerName);
+      basePath.setAttribute("class", "wire-base" + (isPassBranch ? " is-pass" : ""));
       dom.wires.appendChild(basePath);
 
       var pulsePath = document.createElementNS(SVG_NS, "path");
       pulsePath.setAttribute("d", d);
       pulsePath.setAttribute("fill", "none");
-      pulsePath.setAttribute("stroke", "var(--accent)");
-      pulsePath.setAttribute("stroke-width", "3");
+      pulsePath.setAttribute("stroke", pulseColor);
+      pulsePath.setAttribute("stroke-width", isPassBranch ? "3.2" : "3");
       pulsePath.setAttribute("stroke-linejoin", "round");
-      pulsePath.setAttribute("opacity", "0.55");
-      pulsePath.setAttribute("class", "wire-pulse");
+      pulsePath.setAttribute("stroke-linecap", "round");
+      pulsePath.setAttribute("opacity", isPassBranch ? "0.7" : "0.55");
+      pulsePath.setAttribute("class", "wire-pulse" + (isPassBranch ? " is-pass" : ""));
       dom.wires.appendChild(pulsePath);
+
+      if (isPassBranch) {
+        var lblPassX = ax + (bx - ax) / 2;
+        var lblPassY = midY;
+        dom.wires.appendChild(createSvgBadge("Đạt", lblPassX, lblPassY, "pass"));
+      }
+    }
+
+    // Vẽ luồng rẽ nhánh: Bước 06 quay lại Bước 05 khi "Không đạt"
+    var node5 = dom.flowCanvas.querySelector('.node[data-step-order="5"]');
+    var node6 = dom.flowCanvas.querySelector('.node[data-step-order="6"]');
+    if (node5 && node6) {
+      var rect5 = node5.getBoundingClientRect();
+      var rect6 = node6.getBoundingClientRect();
+
+      var cx5 = rect5.left - canvasRect.left + rect5.width / 2;
+      var y5_bottom = rect5.bottom - canvasRect.top;
+      var x6_left = rect6.left - canvasRect.left;
+      var y6_center = rect6.top - canvasRect.top + rect6.height / 2;
+
+      var cornerR = 18;
+      var dFail = "M" + x6_left + "," + y6_center + 
+        " L" + (cx5 + cornerR) + "," + y6_center + 
+        " Q" + cx5 + "," + y6_center + " " + cx5 + "," + (y6_center - cornerR) + 
+        " L" + cx5 + "," + (y5_bottom + 8);
+
+      var failBasePath = document.createElementNS(SVG_NS, "path");
+      failBasePath.setAttribute("d", dFail);
+      failBasePath.setAttribute("fill", "none");
+      failBasePath.setAttribute("stroke", "var(--risk)");
+      failBasePath.setAttribute("stroke-width", "2.8");
+      failBasePath.setAttribute("stroke-linejoin", "round");
+      failBasePath.setAttribute("stroke-linecap", "round");
+      failBasePath.setAttribute("marker-end", "url(#flowArrowRed)");
+      failBasePath.setAttribute("class", "wire-base is-fail");
+      dom.wires.appendChild(failBasePath);
+
+      var failPulsePath = document.createElementNS(SVG_NS, "path");
+      failPulsePath.setAttribute("d", dFail);
+      failPulsePath.setAttribute("fill", "none");
+      failPulsePath.setAttribute("stroke", "var(--risk)");
+      failPulsePath.setAttribute("stroke-width", "3.2");
+      failPulsePath.setAttribute("opacity", "0.7");
+      failPulsePath.setAttribute("stroke-linejoin", "round");
+      failPulsePath.setAttribute("stroke-linecap", "round");
+      failPulsePath.setAttribute("class", "wire-pulse is-fail");
+      dom.wires.appendChild(failPulsePath);
+
+      var badgeFailX = cx5 + (x6_left - cx5) / 2;
+      var badgeFailY = y6_center;
+      dom.wires.appendChild(createSvgBadge("Không đạt", badgeFailX, badgeFailY, "fail"));
     }
   }
 
@@ -629,6 +775,34 @@
     if (storage && typeof storage.saveTaskChecklist === "function") {
       storage.saveTaskChecklist(DATA.storageKey + "_tasks", state.taskProgress);
     }
+  }
+
+  function resetStepTasks(stepId) {
+    if (state.taskProgress && state.taskProgress[stepId]) {
+      delete state.taskProgress[stepId];
+      if (storage && typeof storage.saveTaskChecklist === "function") {
+        storage.saveTaskChecklist(DATA.storageKey + "_tasks", state.taskProgress);
+      }
+    }
+    var step = getStepById(stepId);
+    var defaultTasks = (step && Array.isArray(step.tasks)) ? step.tasks : [];
+    var taskMap = {};
+    defaultTasks.forEach(function (t) {
+      if (t && t.id) taskMap[t.id] = Boolean(t.checked);
+    });
+
+    var chks = dom.panelInner.querySelectorAll(".task-checkbox");
+    Array.prototype.slice.call(chks).forEach(function (chk) {
+      var tId = chk.dataset.taskId;
+      var def = Boolean(taskMap[tId]);
+      chk.checked = def;
+      var itemEl = chk.closest(".task-item");
+      if (itemEl) {
+        itemEl.classList.toggle("is-done", def);
+      }
+    });
+
+    showToast("Đã đặt lại các dấu tick trong danh sách công việc của bước này.");
   }
 
   function renderTasksBlock(stepId, tasks) {
@@ -735,17 +909,31 @@
         '<div class="sec sec-risks">' +
           '<div class="sec-head">' +
             "<h4>4. Rủi ro phát sinh &amp; Cách giải quyết</h4>" +
-            '<button type="button" class="sec-toggle-btn" id="toggleRisksBtn" aria-expanded="true" title="Thu gọn hoặc mở rộng mục rủi ro">' +
-              '<span class="sec-toggle-text">Thu gọn</span>' +
-              '<span class="sec-toggle-icon" aria-hidden="true">▲</span>' +
-            "</button>" +
+            '<div class="sec-head-actions">' +
+              '<button type="button" class="sec-toggle-btn" id="resetStepTicksBtn" title="Đặt lại các dấu tick của bước này">' +
+                '<span class="sec-toggle-icon" aria-hidden="true">↺</span>' +
+                '<span class="sec-toggle-text">Đặt lại</span>' +
+              "</button>" +
+              '<button type="button" class="sec-toggle-btn" id="toggleRisksBtn" aria-expanded="true" title="Thu gọn hoặc mở rộng mục rủi ro">' +
+                '<span class="sec-toggle-text">Thu gọn</span>' +
+                '<span class="sec-toggle-icon" aria-hidden="true">▲</span>' +
+              "</button>" +
+            "</div>" +
           "</div>" +
           '<div class="sec-collapsible" id="risksCollapsible">' +
             renderRisksBlock(step.risks) +
           "</div>" +
         "</div>" +
         '<div class="sec sec-tasks">' +
-          "<h4>5. Những công việc cần làm</h4>" +
+          '<div class="sec-head">' +
+            "<h4>5. Những công việc cần làm</h4>" +
+            '<div class="sec-head-actions">' +
+              '<button type="button" class="sec-toggle-btn" id="resetTasksBtn" title="Đặt lại các dấu tick trong mục này về mặc định">' +
+                '<span class="sec-toggle-icon" aria-hidden="true">↺</span>' +
+                '<span class="sec-toggle-text">Đặt lại</span>' +
+              "</button>" +
+            "</div>" +
+          "</div>" +
           renderTasksBlock(step.id, step.tasks) +
         "</div>" +
       "</div>" +
@@ -799,6 +987,20 @@
         var icon = toggleRisksBtn.querySelector(".sec-toggle-icon");
         if (txt) txt.textContent = nextState ? "Thu gọn" : "Mở rộng";
         if (icon) icon.textContent = nextState ? "▲" : "▼";
+      });
+    }
+
+    var resetStepTicksBtn = document.getElementById("resetStepTicksBtn");
+    if (resetStepTicksBtn) {
+      resetStepTicksBtn.addEventListener("click", function () {
+        resetStepTasks(stepId);
+      });
+    }
+
+    var resetTasksBtn = document.getElementById("resetTasksBtn");
+    if (resetTasksBtn) {
+      resetTasksBtn.addEventListener("click", function () {
+        resetStepTasks(stepId);
       });
     }
 

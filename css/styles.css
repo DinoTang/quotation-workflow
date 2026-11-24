@@ -1134,6 +1134,19 @@ body.ov .phaserail {
   }
 }
 
+.wire-badge {
+  pointer-events: auto;
+  user-select: none;
+}
+
+.wire-badge rect {
+  filter: drop-shadow(0 2px 5px rgba(15, 45, 48, 0.16));
+}
+
+.flow-branch-mobile {
+  display: none;
+}
+
 .flow-row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1431,7 +1444,8 @@ body.ov .phaserail {
   border-bottom: 0;
 }
 
-.sec > h4 {
+.sec > h4,
+.sec-head h4 {
   font-family: var(--mono);
   font-size: 10.5px;
   letter-spacing: 0.12em;
@@ -1444,7 +1458,8 @@ body.ov .phaserail {
   gap: 8px;
 }
 
-.sec > h4::after {
+.sec > h4::after,
+.sec-head h4::after {
   content: "";
   flex: 1;
   height: 1px;
@@ -1552,6 +1567,14 @@ ul.list li::marker {
 
 .sec-head h4 {
   margin-bottom: 0;
+  flex: 1;
+}
+
+.sec-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .sec-toggle-btn {
@@ -2722,6 +2745,41 @@ footer {
 
   .pmark i {
     margin: 0;
+  }
+
+  .flow-branch-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 12px 0 6px;
+    padding: 0 4px;
+  }
+
+  .flow-branch-mobile .branch-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+
+  .flow-branch-mobile .branch-pill.is-pass {
+    background: var(--pass-soft);
+    color: var(--pass);
+    border: 1px solid color-mix(in srgb, var(--pass) 40%, transparent);
+  }
+
+  .flow-branch-mobile .branch-pill.is-fail {
+    background: var(--risk-soft);
+    color: var(--risk);
+    border: 1px solid color-mix(in srgb, var(--risk) 40%, transparent);
+  }
+
+  .flow-branch-mobile .branch-tag {
+    font-weight: 800;
   }
 }
 
