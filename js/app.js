@@ -909,16 +909,10 @@
         '<div class="sec sec-risks">' +
           '<div class="sec-head">' +
             "<h4>4. Rủi ro phát sinh &amp; Cách giải quyết</h4>" +
-            '<div class="sec-head-actions">' +
-              '<button type="button" class="sec-toggle-btn" id="resetStepTicksBtn" title="Đặt lại các dấu tick của bước này">' +
-                '<span class="sec-toggle-icon" aria-hidden="true">↺</span>' +
-                '<span class="sec-toggle-text">Đặt lại</span>' +
-              "</button>" +
-              '<button type="button" class="sec-toggle-btn" id="toggleRisksBtn" aria-expanded="true" title="Thu gọn hoặc mở rộng mục rủi ro">' +
-                '<span class="sec-toggle-text">Thu gọn</span>' +
-                '<span class="sec-toggle-icon" aria-hidden="true">▲</span>' +
-              "</button>" +
-            "</div>" +
+            '<button type="button" class="sec-toggle-btn" id="toggleRisksBtn" aria-expanded="true" title="Thu gọn hoặc mở rộng mục rủi ro">' +
+              '<span class="sec-toggle-text">Thu gọn</span>' +
+              '<span class="sec-toggle-icon" aria-hidden="true">▲</span>' +
+            "</button>" +
           "</div>" +
           '<div class="sec-collapsible" id="risksCollapsible">' +
             renderRisksBlock(step.risks) +
@@ -987,13 +981,6 @@
         var icon = toggleRisksBtn.querySelector(".sec-toggle-icon");
         if (txt) txt.textContent = nextState ? "Thu gọn" : "Mở rộng";
         if (icon) icon.textContent = nextState ? "▲" : "▼";
-      });
-    }
-
-    var resetStepTicksBtn = document.getElementById("resetStepTicksBtn");
-    if (resetStepTicksBtn) {
-      resetStepTicksBtn.addEventListener("click", function () {
-        resetStepTasks(stepId);
       });
     }
 
