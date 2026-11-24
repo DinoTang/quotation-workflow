@@ -204,11 +204,14 @@
     var meta = activeMeta || {};
     var total = steps.length;
 
-    dom.eyebrowCategory.textContent = meta.eyebrowCategory || "Quy trình nội bộ";
+    var category = meta.eyebrowCategory || "Quy trình nghiệp vụ đại lý tàu biển";
+    if (category === "Quy trình nghiệp vụ đại lý tàu biển nội bộ" || category === "Quy trình nội bộ") {
+      category = "Quy trình nghiệp vụ đại lý tàu biển";
+    }
+    dom.eyebrowCategory.textContent = category;
     dom.eyebrowModule.textContent = meta.eyebrowModule || "Quy trình báo giá";
-    dom.eyebrowCount.textContent = meta.isDraftPlaceholder
-      ? "Dự kiến ~" + total + " bước sơ bộ"
-      : "Gồm " + total + " bước";
+    var formattedTotal = total < 10 ? "0" + total : total;
+    dom.eyebrowCount.textContent = "Quy trình gồm " + formattedTotal + " bước";
     dom.eyebrowVersion.textContent = meta.version || PLACEHOLDER_VAL;
     dom.eyebrowOrg.textContent = meta.organization || PLACEHOLDER_VAL;
     dom.pageTitle.textContent = meta.title || "Quy trình báo giá";
@@ -264,7 +267,7 @@
         stats.todo + " bước chưa hoàn thành — vui lòng rà soát kỹ đầu ra trước khi kết thúc lượt báo giá.";
     } else {
       dom.progressStatus.textContent =
-        "Hoàn tất 100% các bước trong quy trình báo giá. Khi cần thực hiện một báo giá mới, hãy nhấn \"Clear All\" để đặt lại toàn bộ dấu hoàn thành.";
+        "Hoàn tất 100% các bước trong quy trình báo giá. Khi cần thực hiện một báo giá mới, hãy nhấn \"Đặt lại tiến độ\" để bắt đầu lượt mới.";
     }
 
     dom.clearAllBtn.disabled = stats.done === 0;
@@ -360,7 +363,7 @@
         : '<span class="rpill rpill-todo">Chưa hoàn thành</span>';
 
       if (step.isPlaceholder) {
-        badgesHtml += '<span class="rpill rpill-ph">Placeholder minh họa</span>';
+        badgesHtml += '<span class="rpill rpill-ph">Lưu ý về phạm vi áp dụng</span>';
       }
       if (hasValidRisks(step)) {
         badgesHtml += '<span class="rpill rpill-risk">Lưu ý rủi ro</span>';
@@ -802,12 +805,12 @@
       }
     });
 
-    showToast("Đã đặt lại các dấu tick trong danh sách công việc của bước này.");
+    showToast("Đã đặt lại các dấu tick trong checklist công việc của bước này.");
   }
 
   function renderTasksBlock(stepId, tasks) {
     if (!Array.isArray(tasks) || tasks.length === 0) {
-      return '<p class="missing-val">' + escapeHtml(PLACEHOLDER_VAL) + " (chưa có danh sách công việc cần làm)</p>";
+      return '<p class="missing-val">' + escapeHtml(PLACEHOLDER_VAL) + " (chưa có checklist công việc)</p>";
     }
 
     var validTasks = [];
@@ -872,7 +875,7 @@
       ? '<span class="rpill rpill-done">Đã hoàn thành ✓</span>'
       : '<span class="rpill rpill-todo">Chưa hoàn thành</span>';
     var placeholderBadge = step.isPlaceholder
-      ? '<span class="rpill rpill-ph">Placeholder minh họa</span>'
+      ? '<span class="rpill rpill-ph">Lưu ý về phạm vi áp dụng</span>'
       : "";
 
     var html =
@@ -920,9 +923,9 @@
         "</div>" +
         '<div class="sec sec-tasks">' +
           '<div class="sec-head">' +
-            "<h4>5. Những công việc cần làm</h4>" +
+            "<h4>5. Checklist thực hiện công việc</h4>" +
             '<div class="sec-head-actions">' +
-              '<button type="button" class="sec-toggle-btn" id="resetTasksBtn" title="Đặt lại các dấu tick trong mục này về mặc định">' +
+              '<button type="button" class="sec-toggle-btn" id="resetTasksBtn" title="Đặt lại các dấu tick trong checklist này về mặc định">' +
                 '<span class="sec-toggle-icon" aria-hidden="true">↺</span>' +
                 '<span class="sec-toggle-text">Đặt lại</span>' +
               "</button>" +

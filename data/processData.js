@@ -55,18 +55,18 @@
     placeholderText: PLACEHOLDER_TEXT,
     stepAccents: STEP_ACCENTS,
     meta: {
-      eyebrowCategory: "Quy trình nội bộ",
+      eyebrowCategory: "Quy trình nghiệp vụ đại lý tàu biển",
       eyebrowModule: "Quy trình báo giá",
       version: PLACEHOLDER_TEXT,
       organization: PLACEHOLDER_TEXT,
-      sourceDocument: PLACEHOLDER_TEXT,
+      sourceDocument: "Chương 3 – Khóa luận tốt nghiệp (Đề xuất quy trình lập PDA)",
       maintainerContact: PLACEHOLDER_TEXT,
       title: "Quy trình báo giá",
       // Gán chuỗi mô tả vào `dek` nếu muốn thay thế đoạn giới thiệu mặc định trong index.html
       dek: null,
       isDraftPlaceholder: true,
       draftBannerText:
-        "Dữ liệu nghiệp vụ hiện đang ở trạng thái Placeholder minh họa (dự kiến khoảng 7 bước sơ bộ). Tên bước, chủ trì, phối hợp, chứng từ và rủi ro sẽ được điền chính xác sau khi nhận tài liệu quy trình báo giá chính thức."
+        "Nội dung nghiệp vụ được xây dựng trên cơ sở quy trình lập PDA do nhóm nghiên cứu đề xuất tại Chương 3 của khóa luận."
     },
     steps: [
       createPlaceholderStep(1),

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Quy trình báo giá — Tổng quan &amp; Theo dõi tiến độ thực hiện</title>
-  <meta name="description" content="Trang tra cứu chi tiết từng bước và theo dõi tiến độ thực hiện quy trình báo giá: nội dung công việc, đơn vị chủ trì, phối hợp, thông tin / chứng từ đầu vào/đầu ra và danh sách công việc cần làm.">
+  <meta name="description" content="Trang tra cứu chi tiết từng bước và theo dõi tiến độ thực hiện quy trình báo giá: nội dung công việc, đơn vị chủ trì, phối hợp, thông tin / chứng từ đầu vào/đầu ra và checklist thực hiện công việc.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230F2D30'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11.5' stroke='%23F5B841' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
   <script>
     (function () {
@@ -24,11 +24,11 @@
     <div class="mast-in">
       <div class="mast-top">
         <div class="eyebrow" aria-label="Thông tin tài liệu quy trình">
-          <span id="eyebrowCategory">Quy trình nội bộ</span>
+          <span id="eyebrowCategory">Quy trình nghiệp vụ đại lý tàu biển</span>
           <span aria-hidden="true">·</span>
           <b id="eyebrowModule">Quy trình báo giá</b>
           <span aria-hidden="true">·</span>
-          <span id="eyebrowCount">Dự kiến ~7 bước sơ bộ</span>
+          <span id="eyebrowCount">Quy trình gồm 08 bước</span>
           <span aria-hidden="true">·</span>
           <span>Phiên bản: <strong id="eyebrowVersion">Chưa được cung cấp</strong></span>
           <span aria-hidden="true">·</span>
@@ -44,7 +44,7 @@
       <p class="dek" id="pageDek">
         Trang tổng hợp toàn bộ các bước trong <strong>quy trình báo giá</strong> theo đúng trình tự thực hiện.
         Chọn từng bước để <em>xem chi tiết</em> nội dung công việc, người hoặc đơn vị chủ trì, đơn vị cần phối hợp,
-        thông tin / chứng từ đầu vào, kết quả đầu ra, rủi ro thường gặp &amp; cách xử lý cùng danh sách công việc cần làm. Đánh dấu vào ô hoàn thành sau khi
+        thông tin / chứng từ đầu vào, kết quả đầu ra, rủi ro thường gặp &amp; cách xử lý cùng checklist thực hiện công việc. Đánh dấu vào ô hoàn thành sau khi
         xử lý xong công việc của mỗi bước để theo dõi tiến độ cho lượt báo giá hiện tại.
       </p>
 
@@ -69,10 +69,9 @@
           <button class="sync-retry-btn" id="syncRetryBtn" type="button" hidden>Thử lại</button>
         </div>
         <div class="draft-banner" id="draftBanner" role="status">
-          <span class="draft-pill">PLACEHOLDER MINH HỌA</span>
+          <span class="draft-pill">LƯU Ý VỀ PHẠM VI ÁP DỤNG</span>
           <span id="draftBannerText">
-            Dữ liệu nghiệp vụ hiện đang ở trạng thái Placeholder minh họa (dự kiến khoảng 7 bước sơ bộ).
-            Tên bước, chủ trì, phối hợp, chứng từ và rủi ro sẽ được điền chính xác sau khi nhận tài liệu quy trình báo giá chính thức.
+            Nội dung nghiệp vụ được xây dựng trên cơ sở quy trình lập PDA do nhóm nghiên cứu đề xuất tại Chương 3 của khóa luận.
           </span>
         </div>
 
@@ -86,7 +85,7 @@
               <button class="clear-btn" type="button" id="clearAllBtn" disabled
                 title="Hiện chưa có bước nào được đánh dấu hoàn thành.">
                 <span aria-hidden="true">↺</span>
-                <span>Clear All</span>
+                <span>Đặt lại tiến độ</span>
               </button>
             </div>
           </div>
@@ -94,7 +93,7 @@
           <div class="metrics-grid">
             <div class="metric">
               <span class="metric-label">Tổng số bước</span>
-              <strong class="metric-val" id="metricTotal">7 bước</strong>
+              <strong class="metric-val" id="metricTotal">08 bước</strong>
             </div>
             <div class="metric metric-done">
               <span class="metric-label">Đã hoàn thành</span>
@@ -102,7 +101,7 @@
             </div>
             <div class="metric metric-todo">
               <span class="metric-label">Chưa hoàn thành</span>
-              <strong class="metric-val" id="metricTodo">7 bước</strong>
+              <strong class="metric-val" id="metricTodo">08 bước</strong>
             </div>
             <div class="metric metric-pct">
               <span class="metric-label">Tỷ lệ hoàn thành</span>
@@ -112,7 +111,7 @@
 
           <div class="bar-wrap">
             <div class="bar-meta">
-              <span class="bar-summary" id="progressText">Đã hoàn thành 0 / 7 bước (0%)</span>
+              <span class="bar-summary" id="progressText">Đã hoàn thành 0 / 8 bước (0%)</span>
             </div>
             <div class="bar-track" role="progressbar" id="progressBar"
               aria-label="Tỷ lệ hoàn thành quy trình báo giá"
@@ -127,10 +126,10 @@
           <div class="progress-foot">
             <div class="filters" role="group" aria-label="Lọc trạng thái các bước" id="filterGroup">
               <button class="filter-pill" type="button" data-filter="all" aria-pressed="true">
-                Tất cả (<span id="filterCountAll">7</span>)
+                Tất cả (<span id="filterCountAll">8</span>)
               </button>
               <button class="filter-pill" type="button" data-filter="todo" aria-pressed="false">
-                Chưa hoàn thành (<span id="filterCountTodo">7</span>)
+                Chưa hoàn thành (<span id="filterCountTodo">8</span>)
               </button>
               <button class="filter-pill" type="button" data-filter="done" aria-pressed="false">
                 Đã hoàn thành (<span id="filterCountDone">0</span>)
@@ -156,17 +155,17 @@
           <div class="ovnote">
             <span><i class="sw sw-check" aria-hidden="true"></i> <strong>Đánh dấu hoàn thành:</strong> Chỉ tick khi <em>công việc thực tế</em> của bước đã hoàn thành, không dùng để đánh dấu "đã đọc".</span>
             <span><i class="sw sw-info" aria-hidden="true"></i> <strong>Nhấn vào bước:</strong> Mở bảng chi tiết gồm 6 nhóm thông tin nghiệp vụ.</span>
-            <span><i class="sw sw-reset" aria-hidden="true"></i> <strong>Clear All:</strong> Xóa toàn bộ dấu tick khi bắt đầu một hồ sơ báo giá mới.</span>
+            <span><i class="sw sw-reset" aria-hidden="true"></i> <strong>Đặt lại tiến độ:</strong> Xóa toàn bộ dấu tick khi bắt đầu một hồ sơ báo giá mới.</span>
           </div>
 
           <div class="pband" id="overviewBand">
             <div class="bhead">
-              <span class="bnum" id="bandNum">07</span>
+              <span class="bnum" id="bandNum">08</span>
               <span class="bhead-text">
                 <span class="bttl">Các bước thực hiện quy trình báo giá</span>
                 <span class="bsub">Nhấn từng bước để xem chi tiết · Tick ô vuông khi đã làm xong việc</span>
               </span>
-              <span class="bcount" id="bandCount">0 / 7 hoàn thành</span>
+              <span class="bcount" id="bandCount">0 / 8 hoàn thành</span>
             </div>
             <div class="step-list" id="stepList"></div>
             <div class="filter-empty" id="filterEmpty" hidden></div>
@@ -176,7 +175,7 @@
         <section id="flowview" class="flowview" role="tabpanel" aria-labelledby="tabFlow" hidden>
           <div class="ovnote flow-note">
             <span><i class="sw sw-info" aria-hidden="true"></i> <strong>Sơ đồ tuần tự:</strong> Hiển thị các bước theo đúng trình tự từ Bước 01 đến bước cuối cùng.</span>
-            <span><i class="sw sw-warn" aria-hidden="true"></i> <strong>Tuyến trách nhiệm phòng ban:</strong> Chưa được cung cấp (sẽ cập nhật khi có tài liệu chính thức).</span>
+            <span><i class="sw sw-user" aria-hidden="true"></i> <strong>Phân công trách nhiệm đề xuất:</strong> Nhân viên Đại lý thương vụ (soạn thảo &amp; thực hiện) · Trưởng phòng Đại lý (phê duyệt &amp; giám sát).</span>
           </div>
           <div class="scroller">
             <div class="flow" id="flowCanvas">
@@ -193,7 +192,7 @@
         <div class="empty">
           <span class="big" aria-hidden="true">◇</span>
           Chọn một bước trong quy trình báo giá để xem hướng dẫn công việc, đơn vị phối hợp,
-          thông tin / chứng từ đầu vào/đầu ra, rủi ro phát sinh &amp; cách giải quyết và danh sách công việc cần làm.
+          thông tin / chứng từ đầu vào/đầu ra, rủi ro phát sinh &amp; cách giải quyết và checklist thực hiện công việc.
         </div>
       </div>
     </aside>
@@ -234,7 +233,7 @@
             </tr>
             <tr>
               <td class="doc">4. Bắt đầu lượt báo giá mới</td>
-              <td>Nhấn nút <strong>Clear All</strong> ở thanh tiến độ và chọn <strong>Xác nhận Clear All</strong> trong hộp thoại hiện ra.</td>
+              <td>Nhấn nút <strong>Đặt lại tiến độ</strong> ở thanh tiến độ và chọn <strong>Xác nhận đặt lại</strong> trong hộp thoại hiện ra.</td>
               <td>Toàn bộ dấu tick trở về trạng thái chưa hoàn thành (<code>0%</code>) để dùng lại cho bộ hồ sơ báo giá tiếp theo.</td>
             </tr>
           </tbody>
@@ -248,17 +247,16 @@
         (2) <b>Trạng thái lưu cục bộ trên trình duyệt:</b> Tiến độ bạn đã đánh dấu được tự động lưu trên chính trình duyệt
         và thiết bị này (<code>LocalStorage</code>). Khi tải lại trang hoặc quay lại sau đó trên cùng trình duyệt,
         tiến độ vẫn còn nguyên — nhưng <b>không tự động đồng bộ</b> sang máy tính khác, trình duyệt khác hay người dùng khác.
-        (3) <b>Nút Clear All không làm mất nội dung quy trình:</b> Lệnh này chỉ xóa các dấu tick hoàn thành của lượt báo giá cũ
+        (3) <b>Nút Đặt lại tiến độ không làm mất nội dung quy trình:</b> Lệnh này chỉ xóa các dấu tick hoàn thành của lượt báo giá cũ
         để bạn bắt đầu một lượt mới. Hộp thoại xác nhận luôn xuất hiện trước khi xóa để tránh bấm nhầm.
-        (4) <b>Nguồn nội dung nghiệp vụ:</b> Mọi tên bước, thứ tự, đơn vị thực hiện, chứng từ và phương án xử lý rủi ro chỉ
-        được cập nhật theo tài liệu quy trình báo giá chính thức do bên yêu cầu bàn giao.
+        (4) <b>Cơ sở xây dựng nội dung nghiệp vụ:</b> Nội dung nghiệp vụ được xây dựng trên cơ sở quy trình lập PDA do nhóm nghiên cứu đề xuất tại Chương 3 của khóa luận.
       </div>
     </div>
   </section>
 
   <footer>
     <div class="fin">
-      <span>Nguồn nội dung nghiệp vụ: Tài liệu quy trình báo giá chính thức (<span id="footerSource">Chưa được cung cấp</span>).</span>
+      <span>Nội dung nghiệp vụ được xây dựng trên cơ sở quy trình lập PDA do nhóm nghiên cứu đề xuất tại Chương 3 của khóa luận (<span id="footerSource">Chưa được cung cấp</span>).</span>
       <span class="fin-right">
         <span>Tiến độ hoàn thành chỉ lưu cục bộ trên trình duyệt/thiết bị hiện tại · Đầu mối cập nhật: <span id="footerContact">Chưa được cung cấp</span>.</span>
         <a class="footer-admin-link" href="/admin">Quản lý quy trình</a>
@@ -266,7 +264,7 @@
     </div>
   </footer>
 
-  <!-- Hộp thoại xác nhận Clear All -->
+  <!-- Hộp thoại xác nhận Đặt lại tiến độ -->
   <div class="modal-backdrop" id="clearModal" hidden>
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalDesc">
       <div class="modal-head">
@@ -279,13 +277,13 @@
           để bạn bắt đầu một lượt thực hiện quy trình báo giá mới.
         </p>
         <p class="modal-note">
-          <strong>Lưu ý:</strong> Lệnh <strong>Clear All</strong> chỉ đặt lại tiến độ về 0%, toàn bộ nội dung hướng dẫn
+          <strong>Lưu ý:</strong> Lệnh <strong>Đặt lại tiến độ</strong> chỉ đưa tiến độ về 0%, toàn bộ nội dung hướng dẫn
           của quy trình vẫn được giữ nguyên. Hành động này không thể hoàn tác.
         </p>
       </div>
       <div class="modal-foot">
         <button class="btn-secondary" type="button" id="modalCancelBtn">Hủy, giữ nguyên tiến độ</button>
-        <button class="btn-danger" type="button" id="modalConfirmBtn">Xác nhận Clear All</button>
+        <button class="btn-danger" type="button" id="modalConfirmBtn">Xác nhận đặt lại tiến độ</button>
       </div>
     </div>
   </div>

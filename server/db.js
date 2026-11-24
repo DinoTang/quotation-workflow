@@ -3,17 +3,17 @@ import fs from "node:fs";
 import path from "node:path";
 
 var DEFAULT_META = {
-  eyebrowCategory: "Quy trình nội bộ",
+  eyebrowCategory: "Quy trình nghiệp vụ đại lý tàu biển",
   eyebrowModule: "Quy trình báo giá",
   title: "Quy trình báo giá",
   dek: null,
   version: "Chưa được cung cấp",
   organization: "Chưa được cung cấp",
-  sourceDocument: "Chưa được cung cấp",
+  sourceDocument: "Chương 3 – Khóa luận tốt nghiệp (Đề xuất quy trình lập PDA)",
   maintainerContact: "Chưa được cung cấp",
   isDraftPlaceholder: true,
   draftBannerText:
-    "Dữ liệu nghiệp vụ hiện đang ở trạng thái Placeholder minh họa (dự kiến khoảng 7 bước sơ bộ). Tên bước, chủ trì, phối hợp, chứng từ và rủi ro sẽ được điền chính xác sau khi nhận tài liệu quy trình báo giá chính thức."
+    "Nội dung nghiệp vụ được xây dựng trên cơ sở quy trình lập PDA do nhóm nghiên cứu đề xuất tại Chương 3 của khóa luận."
 };
 
 function cleanEnvString(val) {
@@ -131,8 +131,12 @@ async function supabaseFetch(endpoint, options) {
 
 function mapMetaFromDb(row) {
   if (!row) return Object.assign({}, DEFAULT_META);
+  var category = row.eyebrow_category || DEFAULT_META.eyebrowCategory;
+  if (category === "Quy trình nghiệp vụ đại lý tàu biển nội bộ" || category === "Quy trình nội bộ") {
+    category = "Quy trình nghiệp vụ đại lý tàu biển";
+  }
   return {
-    eyebrowCategory: row.eyebrow_category || DEFAULT_META.eyebrowCategory,
+    eyebrowCategory: category,
     eyebrowModule: row.eyebrow_module || DEFAULT_META.eyebrowModule,
     title: row.title || DEFAULT_META.title,
     dek: row.dek || null,

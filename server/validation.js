@@ -132,7 +132,7 @@ export function validateMetaPayload(body) {
 
   return {
     data: {
-      eyebrowCategory: cleanText(body.eyebrowCategory, 80, "Quy trình nội bộ"),
+      eyebrowCategory: cleanText(body.eyebrowCategory, 80, "Quy trình nghiệp vụ đại lý tàu biển"),
       eyebrowModule: cleanText(body.eyebrowModule, 80, "Quy trình báo giá"),
       title: title,
       dek: typeof body.dek === "string" && body.dek.trim() ? body.dek.trim().slice(0, 1000) : null,
@@ -144,7 +144,7 @@ export function validateMetaPayload(body) {
       draftBannerText: cleanText(
         body.draftBannerText,
         600,
-        "Dữ liệu nghiệp vụ hiện đang ở trạng thái Placeholder minh họa (dự kiến khoảng 7 bước sơ bộ). Tên bước, chủ trì, phối hợp, chứng từ và rủi ro sẽ được điền chính xác sau khi nhận tài liệu quy trình báo giá chính thức."
+        "Nội dung nghiệp vụ được xây dựng trên cơ sở quy trình lập PDA do nhóm nghiên cứu đề xuất tại Chương 3 của khóa luận."
       )
     }
   };

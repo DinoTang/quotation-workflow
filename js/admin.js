@@ -271,7 +271,7 @@
       var riskCount = Array.isArray(step.risks) ? step.risks.length : 0;
       var taskCount = Array.isArray(step.tasks) ? step.tasks.length : 0;
       var draftBadge = step.isPlaceholder
-        ? '<span class="admin-badge-draft">Placeholder minh họa</span>'
+        ? '<span class="admin-badge-draft">Lưu ý về phạm vi áp dụng</span>'
         : "";
 
       card.innerHTML =
@@ -287,7 +287,7 @@
           '<div class="admin-step-meta">' +
             "<span>Chủ trì: <strong>" + escapeHtml(summarizeField(step.lead)) + "</strong></span>" +
             "<span>Rủi ro: <strong>" + (riskCount > 0 ? riskCount + " mục" : DEFAULT_PLACEHOLDER) + "</strong></span>" +
-            "<span>Công việc: <strong>" + (taskCount > 0 ? taskCount + " mục" : DEFAULT_PLACEHOLDER) + "</strong></span>" +
+            "<span>Checklist: <strong>" + (taskCount > 0 ? taskCount + " mục" : DEFAULT_PLACEHOLDER) + "</strong></span>" +
           "</div>" +
         "</div>" +
         '<div class="admin-step-actions">' +
@@ -317,7 +317,11 @@
   function populateMetaForm() {
     var meta = state.meta || {};
     dom.metaTitle.value = meta.title || "Quy trình báo giá";
-    dom.metaCategory.value = meta.eyebrowCategory || "Quy trình nội bộ";
+    var cat = meta.eyebrowCategory || "Quy trình nghiệp vụ đại lý tàu biển";
+    if (cat === "Quy trình nghiệp vụ đại lý tàu biển nội bộ" || cat === "Quy trình nội bộ") {
+      cat = "Quy trình nghiệp vụ đại lý tàu biển";
+    }
+    dom.metaCategory.value = cat;
     dom.metaModule.value = meta.eyebrowModule || "Quy trình báo giá";
     dom.metaVersion.value = fieldValueToText(meta.version);
     dom.metaVersion.placeholder = DEFAULT_PLACEHOLDER;
@@ -642,7 +646,7 @@
 
     var payload = {
       title: dom.metaTitle.value.trim(),
-      eyebrowCategory: dom.metaCategory.value.trim() || "Quy trình nội bộ",
+      eyebrowCategory: dom.metaCategory.value.trim() || "Quy trình nghiệp vụ đại lý tàu biển",
       eyebrowModule: dom.metaModule.value.trim() || "Quy trình báo giá",
       version: dom.metaVersion.value.trim() || DEFAULT_PLACEHOLDER,
       organization: dom.metaOrg.value.trim() || DEFAULT_PLACEHOLDER,
