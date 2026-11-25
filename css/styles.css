@@ -328,11 +328,12 @@ h1 {
   position: relative;
   z-index: 2;
   display: flex;
+  gap: 10px;
   overflow-x: auto;
   background: var(--paper);
   border-bottom: 1px solid var(--rule);
   margin-inline: calc(-1 * clamp(16px, 4vw, 56px));
-  padding-inline: clamp(16px, 4vw, 56px);
+  padding: 14px clamp(16px, 4vw, 56px);
   scrollbar-width: thin;
 }
 
@@ -341,30 +342,37 @@ body.guide .phaserail {
   display: none;
 }
 
+/* Ô chuyển nhanh từng bước: có viền, bo tròn */
 .ph {
   flex: 1 1 0;
-  min-width: 140px;
-  padding: 12px 12px 12px 0;
-  margin-right: 12px;
-  border: 0;
-  border-bottom: 3px solid transparent;
+  min-width: 150px;
+  padding: 10px 12px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 10px;
   display: flex;
   gap: 10px;
   align-items: center;
-  background: none;
+  background: var(--surface);
   cursor: pointer;
   text-align: left;
   color: var(--ink);
   font: inherit;
-  transition: border-color 0.16s ease;
+  transition: border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
 }
 
 .ph:hover {
-  border-bottom-color: var(--rule-strong);
+  border-color: var(--phc, var(--accent));
+  background: color-mix(in srgb, var(--phc, var(--accent)) 5%, var(--surface));
+}
+
+.ph.is-done {
+  border-color: color-mix(in srgb, var(--pass) 50%, var(--rule-strong));
+  background: color-mix(in srgb, var(--pass-soft) 50%, var(--surface));
 }
 
 .ph[aria-current="true"] {
-  border-bottom-color: var(--phc, var(--accent));
+  border-color: var(--phc, var(--accent));
+  box-shadow: 0 0 0 1px var(--phc, var(--accent));
 }
 
 .ph .n {
@@ -396,7 +404,7 @@ body.guide .phaserail {
 
 .ph:focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: -2px;
+  outline-offset: 2px;
 }
 
 /* ============================================================================
