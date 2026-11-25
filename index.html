@@ -3,9 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Quy trình báo giá — Tổng quan &amp; Theo dõi tiến độ thực hiện</title>
+  <title>La Bàn PDA — Quy trình lập báo giá đại lý tàu biển</title>
+  <meta name="application-name" content="La Bàn PDA">
+  <meta name="theme-color" content="#0C2233">
   <meta name="description" content="Trang tra cứu chi tiết từng bước và theo dõi tiến độ thực hiện quy trình báo giá: nội dung công việc, đơn vị chủ trì, phối hợp, thông tin / chứng từ đầu vào/đầu ra và checklist thực hiện công việc.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230C2233'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11.5' stroke='%23E8B10E' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230C2233'/%3E%3Ccircle cx='16' cy='16' r='10.5' fill='none' stroke='%237DB4E0' stroke-width='1.6'/%3E%3Cpath d='M16 4.5v3M16 24.5v3M4.5 16h3M24.5 16h3' stroke='%237DB4E0' stroke-width='1.6' stroke-linecap='round'/%3E%3Cpath d='M16 8.5l3 7.5h-6z' fill='%23E8B10E'/%3E%3Cpath d='M16 23.5l-3-7.5h6z' fill='%23F3F6F8'/%3E%3Ccircle cx='16' cy='16' r='1.6' fill='%230C2233'/%3E%3C/svg%3E">
   <script>
     (function () {
       try {
@@ -53,6 +55,9 @@
         </button>
         <button class="tab" type="button" role="tab" id="tabFlow" aria-selected="false" aria-controls="flowview">
           Sơ đồ tiến trình <small>Luồng thực hiện tuần tự</small>
+        </button>
+        <button class="tab" type="button" role="tab" id="tabGuide" aria-selected="false" aria-controls="guideview">
+          Hướng dẫn sử dụng <small>Thao tác &amp; quy ước theo dõi</small>
         </button>
       </nav>
 
@@ -183,6 +188,61 @@
           </div>
           <div class="filter-empty flow-empty" id="flowEmpty" hidden></div>
         </section>
+
+        <section class="appendix guideview" id="guideview" role="tabpanel" aria-labelledby="tabGuide" hidden>
+          <div class="app-in">
+            <h2 id="guideHeading">Hướng dẫn sử dụng &amp; Quy ước theo dõi</h2>
+            <p class="dek">
+              Bốn thao tác cơ bản để tra cứu thông tin và kiểm soát tiến độ trong mỗi lượt thực hiện báo giá.
+            </p>
+
+            <div class="tblwrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Thao tác</th>
+                    <th>Cách thực hiện trên website</th>
+                    <th>Kết quả nhận được</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="doc">1. Xem tổng quan quy trình</td>
+                    <td>Theo dõi danh sách các bước được sắp xếp theo đúng thứ tự từ đầu đến cuối ngay tại màn hình chính.</td>
+                    <td>Nắm toàn bộ trình tự báo giá và nhìn ngay những bước nào đã xong hoặc còn dang dở.</td>
+                  </tr>
+                  <tr>
+                    <td class="doc">2. Tra cứu chi tiết từng bước</td>
+                    <td>Nhấn trực tiếp vào một bước bất kỳ trong danh sách (hoặc trên thanh điều hướng nhanh ở chế độ sơ đồ).</td>
+                    <td>Mở bảng thông tin chi tiết: nội dung công việc, chủ trì, phối hợp, thông tin / chứng từ đầu vào - đầu ra, rủi ro &amp; cách giải quyết cùng danh sách công việc cần làm.</td>
+                  </tr>
+                  <tr>
+                    <td class="doc">3. Đánh dấu hoàn thành công việc</td>
+                    <td>Tick vào ô vuông tại bước vừa xử lý xong (ngay trên thẻ bước, sơ đồ hoặc trong bảng chi tiết).</td>
+                    <td>Hệ thống cộng vào tiến độ chung, cập nhật thanh <code>%</code> và tự động lưu lại trên trình duyệt hiện tại.</td>
+                  </tr>
+                  <tr>
+                    <td class="doc">4. Bắt đầu lượt báo giá mới</td>
+                    <td>Nhấn nút <strong>Đặt lại tiến độ</strong> ở thanh tiến độ và chọn <strong>Xác nhận đặt lại</strong> trong hộp thoại hiện ra.</td>
+                    <td>Toàn bộ dấu tick trở về trạng thái chưa hoàn thành (<code>0%</code>) để dùng lại cho bộ hồ sơ báo giá tiếp theo.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="note">
+              <b>Bốn điểm cần ghi nhớ khi sử dụng trang quy trình báo giá.</b>
+              (1) <b>Checkbox dùng để xác nhận hoàn thành công việc thực tế</b>, không phải chỉ xác nhận bạn đã mở ra đọc.
+              Hãy đảm bảo chứng từ đầu ra của bước đã đầy đủ trước khi đánh dấu.
+              (2) <b>Trạng thái lưu cục bộ trên trình duyệt:</b> Tiến độ bạn đã đánh dấu được tự động lưu trên chính trình duyệt
+              và thiết bị này (<code>LocalStorage</code>). Khi tải lại trang hoặc quay lại sau đó trên cùng trình duyệt,
+              tiến độ vẫn còn nguyên — nhưng <b>không tự động đồng bộ</b> sang máy tính khác, trình duyệt khác hay người dùng khác.
+              (3) <b>Nút Đặt lại tiến độ không làm mất nội dung quy trình:</b> Lệnh này chỉ xóa các dấu tick hoàn thành của lượt báo giá cũ
+              để bạn bắt đầu một lượt mới. Hộp thoại xác nhận luôn xuất hiện trước khi xóa để tránh bấm nhầm.
+              (4) <b>Cơ sở xây dựng nội dung nghiệp vụ:</b> Nội dung nghiệp vụ được xây dựng trên cơ sở quy trình lập PDA do nhóm nghiên cứu đề xuất tại Chương 3 của khóa luận.
+            </div>
+          </div>
+        </section>
       </div>
     </main>
 
@@ -197,61 +257,6 @@
     </aside>
   </div>
   <div class="scrim" id="scrim" aria-hidden="true"></div>
-
-  <section class="appendix" aria-labelledby="guideHeading">
-    <div class="app-in">
-      <h2 id="guideHeading">Hướng dẫn sử dụng &amp; Quy ước theo dõi</h2>
-      <p class="dek">
-        Bốn thao tác cơ bản để tra cứu thông tin và kiểm soát tiến độ trong mỗi lượt thực hiện báo giá.
-      </p>
-
-      <div class="tblwrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Thao tác</th>
-              <th>Cách thực hiện trên website</th>
-              <th>Kết quả nhận được</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="doc">1. Xem tổng quan quy trình</td>
-              <td>Theo dõi danh sách các bước được sắp xếp theo đúng thứ tự từ đầu đến cuối ngay tại màn hình chính.</td>
-              <td>Nắm toàn bộ trình tự báo giá và nhìn ngay những bước nào đã xong hoặc còn dang dở.</td>
-            </tr>
-            <tr>
-              <td class="doc">2. Tra cứu chi tiết từng bước</td>
-              <td>Nhấn trực tiếp vào một bước bất kỳ trong danh sách (hoặc trên thanh điều hướng nhanh ở chế độ sơ đồ).</td>
-              <td>Mở bảng thông tin chi tiết: nội dung công việc, chủ trì, phối hợp, thông tin / chứng từ đầu vào - đầu ra, rủi ro &amp; cách giải quyết cùng danh sách công việc cần làm.</td>
-            </tr>
-            <tr>
-              <td class="doc">3. Đánh dấu hoàn thành công việc</td>
-              <td>Tick vào ô vuông tại bước vừa xử lý xong (ngay trên thẻ bước, sơ đồ hoặc trong bảng chi tiết).</td>
-              <td>Hệ thống cộng vào tiến độ chung, cập nhật thanh <code>%</code> và tự động lưu lại trên trình duyệt hiện tại.</td>
-            </tr>
-            <tr>
-              <td class="doc">4. Bắt đầu lượt báo giá mới</td>
-              <td>Nhấn nút <strong>Đặt lại tiến độ</strong> ở thanh tiến độ và chọn <strong>Xác nhận đặt lại</strong> trong hộp thoại hiện ra.</td>
-              <td>Toàn bộ dấu tick trở về trạng thái chưa hoàn thành (<code>0%</code>) để dùng lại cho bộ hồ sơ báo giá tiếp theo.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="note">
-        <b>Bốn điểm cần ghi nhớ khi sử dụng trang quy trình báo giá.</b>
-        (1) <b>Checkbox dùng để xác nhận hoàn thành công việc thực tế</b>, không phải chỉ xác nhận bạn đã mở ra đọc.
-        Hãy đảm bảo chứng từ đầu ra của bước đã đầy đủ trước khi đánh dấu.
-        (2) <b>Trạng thái lưu cục bộ trên trình duyệt:</b> Tiến độ bạn đã đánh dấu được tự động lưu trên chính trình duyệt
-        và thiết bị này (<code>LocalStorage</code>). Khi tải lại trang hoặc quay lại sau đó trên cùng trình duyệt,
-        tiến độ vẫn còn nguyên — nhưng <b>không tự động đồng bộ</b> sang máy tính khác, trình duyệt khác hay người dùng khác.
-        (3) <b>Nút Đặt lại tiến độ không làm mất nội dung quy trình:</b> Lệnh này chỉ xóa các dấu tick hoàn thành của lượt báo giá cũ
-        để bạn bắt đầu một lượt mới. Hộp thoại xác nhận luôn xuất hiện trước khi xóa để tránh bấm nhầm.
-        (4) <b>Cơ sở xây dựng nội dung nghiệp vụ:</b> Nội dung nghiệp vụ được xây dựng trên cơ sở quy trình lập PDA do nhóm nghiên cứu đề xuất tại Chương 3 của khóa luận.
-      </div>
-    </div>
-  </section>
 
   <footer>
     <div class="fin">

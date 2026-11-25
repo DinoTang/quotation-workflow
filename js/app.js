@@ -40,6 +40,8 @@
     themeLabel: document.getElementById("themeLabel"),
     tabOv: document.getElementById("tabOv"),
     tabFlow: document.getElementById("tabFlow"),
+    tabGuide: document.getElementById("tabGuide"),
+    guideview: document.getElementById("guideview"),
     stepRail: document.getElementById("stepRail"),
     shell: document.getElementById("shell"),
     syncStatusBanner: document.getElementById("syncStatusBanner"),
@@ -1157,16 +1159,25 @@
      VIEW TABS & FILTERS
      -------------------------------------------------------------------------- */
   function setView(view) {
-    state.activeView = view === "flow" ? "flow" : "ov";
+    state.activeView = (view === "flow" || view === "guide") ? view : "ov";
     var isOv = state.activeView === "ov";
+    var isFlow = state.activeView === "flow";
+    var isGuide = state.activeView === "guide";
 
     document.body.classList.toggle("ov", isOv);
+    document.body.classList.toggle("guide", isGuide);
     dom.overview.hidden = !isOv;
-    dom.flowview.hidden = isOv;
+    dom.flowview.hidden = !isFlow;
+    if (dom.guideview) dom.guideview.hidden = !isGuide;
     dom.tabOv.setAttribute("aria-selected", String(isOv));
-    dom.tabFlow.setAttribute("aria-selected", String(!isOv));
+    dom.tabFlow.setAttribute("aria-selected", String(isFlow));
+    if (dom.tabGuide) dom.tabGuide.setAttribute("aria-selected", String(isGuide));
 
-    if (!isOv) {
+    if (isGuide && state.activeStepId) {
+      closePanel();
+    }
+
+    if (isFlow) {
       scheduleWireRedraw();
     }
   }
@@ -1199,6 +1210,22 @@
 
     dom.tabOv.addEventListener("click", function () { setView("ov"); });
     dom.tabFlow.addEventListener("click", function () { setView("flow"); });
+    if (dom.tabGuide) {
+      dom.tabGuide.addEventListener("click", function () { setView("guide"); });
+    }
+
+    // Điều hướng bàn phím giữa các tab (mũi tên trái/phải)
+    var tabList = [dom.tabOv, dom.tabFlow, dom.tabGuide].filter(Boolean);
+    var tabViews = ["ov", "flow", "guide"];
+    tabList.forEach(function (tab, i) {
+      tab.addEventListener("keydown", function (e) {
+        if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+        e.preventDefault();
+        var next = (i + (e.key === "ArrowRight" ? 1 : tabList.length - 1)) % tabList.length;
+        setView(tabViews[next]);
+        tabList[next].focus();
+      });
+    });
 
     Array.prototype.slice.call(dom.filterGroup.querySelectorAll(".filter-pill")).forEach(function (btn) {
       btn.addEventListener("click", function () {
