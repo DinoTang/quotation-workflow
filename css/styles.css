@@ -328,12 +328,11 @@ h1 {
   position: relative;
   z-index: 2;
   display: flex;
-  gap: 10px;
   overflow-x: auto;
   background: var(--paper);
   border-bottom: 1px solid var(--rule);
   margin-inline: calc(-1 * clamp(16px, 4vw, 56px));
-  padding: 14px clamp(16px, 4vw, 56px);
+  padding-inline: clamp(16px, 4vw, 56px);
   scrollbar-width: thin;
 }
 
@@ -342,37 +341,30 @@ body.guide .phaserail {
   display: none;
 }
 
-/* Ô chuyển nhanh từng bước: có viền, bo tròn */
 .ph {
   flex: 1 1 0;
-  min-width: 150px;
-  padding: 10px 12px;
-  border: 1px solid var(--rule-strong);
-  border-radius: 10px;
+  min-width: 140px;
+  padding: 12px 12px 12px 0;
+  margin-right: 12px;
+  border: 0;
+  border-bottom: 3px solid transparent;
   display: flex;
   gap: 10px;
   align-items: center;
-  background: var(--surface);
+  background: none;
   cursor: pointer;
   text-align: left;
   color: var(--ink);
   font: inherit;
-  transition: border-color 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+  transition: border-color 0.16s ease;
 }
 
 .ph:hover {
-  border-color: var(--phc, var(--accent));
-  background: color-mix(in srgb, var(--phc, var(--accent)) 5%, var(--surface));
-}
-
-.ph.is-done {
-  border-color: color-mix(in srgb, var(--pass) 50%, var(--rule-strong));
-  background: color-mix(in srgb, var(--pass-soft) 50%, var(--surface));
+  border-bottom-color: var(--rule-strong);
 }
 
 .ph[aria-current="true"] {
-  border-color: var(--phc, var(--accent));
-  box-shadow: 0 0 0 1px var(--phc, var(--accent));
+  border-bottom-color: var(--phc, var(--accent));
 }
 
 .ph .n {
@@ -404,7 +396,7 @@ body.guide .phaserail {
 
 .ph:focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline-offset: -2px;
 }
 
 /* ============================================================================
@@ -829,36 +821,23 @@ body.guide .phaserail {
 
 /* ---------- Hàng bước ---------- */
 .step-list {
-  --row-gap: 12px;
   display: flex;
   flex-direction: column;
-  gap: var(--row-gap);
-  padding: 18px;
 }
 
-/* Mỗi bước là một box riêng, viền bo tròn */
 .rib-row {
   display: flex;
   align-items: stretch;
   background: var(--surface);
-  border: 1px solid var(--rule-strong);
-  border-radius: 12px;
-  transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+  transition: background 0.16s ease;
 }
 
 .rib-row:hover {
   background: color-mix(in srgb, var(--accent) 4%, var(--surface));
-  border-color: color-mix(in srgb, var(--accent) 55%, var(--rule-strong));
-}
-
-.rib-row.is-done {
-  border-color: color-mix(in srgb, var(--pass) 45%, var(--rule-strong));
 }
 
 .rib-row.is-active {
   background: color-mix(in srgb, var(--pc, var(--accent)) 9%, var(--surface));
-  border-color: var(--pc, var(--accent));
-  box-shadow: 0 0 0 1px var(--pc, var(--accent));
 }
 
 /* Cột đường mớn nước: một đường dọc xuyên suốt, ô tick nằm trên đường */
@@ -875,11 +854,11 @@ body.guide .phaserail {
   content: "";
   position: absolute;
   left: 50%;
-  top: calc(-1 * var(--row-gap) - 1px);
-  bottom: calc(-1 * var(--row-gap) - 1px);
+  top: 0;
+  bottom: 0;
   width: 2px;
   margin-left: -1px;
-  background: var(--rule-strong);
+  background: var(--rule);
 }
 
 .rib-row:first-child .rib-check-wrap::before {
@@ -946,7 +925,7 @@ body.guide .phaserail {
   flex: 1;
   min-width: 0;
   border: 0;
-  border-radius: 0 12px 12px 0;
+  border-top: 1px solid var(--rule);
   background: none;
   color: inherit;
   font: inherit;
@@ -956,6 +935,10 @@ body.guide .phaserail {
   align-items: center;
   gap: 18px;
   cursor: pointer;
+}
+
+.rib-row:first-child .rib-trigger {
+  border-top: 0;
 }
 
 .rib-trigger:focus-visible {
@@ -2949,12 +2932,7 @@ footer {
 
   .rib-row:last-child .rib-check-wrap::before {
     bottom: auto;
-    height: calc(30px + var(--row-gap) + 1px);
-  }
-
-  .step-list {
-    --row-gap: 10px;
-    padding: 12px;
+    height: 30px;
   }
 
   .rib-trigger {
@@ -2979,13 +2957,7 @@ footer {
 
   .rbadges {
     order: 4;
-    flex: 1 1 100%;
-    min-width: 0;
     justify-content: flex-start;
-  }
-
-  .rpill {
-    white-space: normal;
   }
 
   .rcar {
