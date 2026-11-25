@@ -21,14 +21,16 @@
 
   var PLACEHOLDER_TEXT = "Chưa được cung cấp";
 
+  // Bảng màu cờ tín hiệu hàng hải — đủ tương phản trên nền sáng và tối
   var STEP_ACCENTS = [
-    { light: "#0F766E", dark: "#4FD1C5" },
-    { light: "#0284C7", dark: "#60C5F7" },
-    { light: "#4F46E5", dark: "#A5B4FC" },
-    { light: "#9333EA", dark: "#D8B4FE" },
-    { light: "#BE185D", dark: "#F472B6" },
-    { light: "#C2410C", dark: "#FB923C" },
-    { light: "#15803D", dark: "#4ADE80" }
+    { light: "#1F5D8C", dark: "#7DB4E0" },
+    { light: "#0E6E78", dark: "#5CC6CF" },
+    { light: "#8A5A06", dark: "#F0C15A" },
+    { light: "#B83227", dark: "#F08A7E" },
+    { light: "#3D4F9A", dark: "#A3B1EC" },
+    { light: "#1F7A4D", dark: "#6FD39D" },
+    { light: "#7A4A2A", dark: "#E0A57E" },
+    { light: "#0C2233", dark: "#E7EEF2" }
   ];
 
   function createPlaceholderStep(order) {
