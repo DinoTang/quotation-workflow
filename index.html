@@ -146,6 +146,8 @@
             <span><i class="sw sw-check" aria-hidden="true"></i> <strong>Đánh dấu hoàn thành:</strong> Chỉ tick khi <em>công việc thực tế</em> của bước đã hoàn thành, không dùng để đánh dấu "đã đọc".</span>
             <span><i class="sw sw-info" aria-hidden="true"></i> <strong>Nhấn vào bước:</strong> Mở bảng chi tiết gồm 8 bước thông tin nghiệp vụ.</span>
             <span><i class="sw sw-reset" aria-hidden="true"></i> <strong>Đặt lại tiến độ:</strong> Xóa toàn bộ dấu tick khi bắt đầu một hồ sơ báo giá mới.</span>
+            <span class="flow-only"><i class="sw sw-info" aria-hidden="true"></i> <strong>Sơ đồ tuần tự:</strong> Hiển thị các bước theo đúng trình tự từ Bước 01 đến bước cuối cùng.</span>
+            <span class="flow-only"><i class="sw sw-user" aria-hidden="true"></i> <strong>Phân công trách nhiệm đề xuất:</strong> Nhân viên Đại lý thương vụ (soạn thảo &amp; thực hiện) · Trưởng phòng Đại lý (phê duyệt &amp; giám sát).</span>
           </div>
 
           <div class="storage-warning" id="storageWarning" hidden role="alert">
@@ -170,10 +172,6 @@
         </section>
 
         <section id="flowview" class="flowview" role="tabpanel" aria-labelledby="tabFlow" hidden>
-          <div class="ovnote flow-note">
-            <span><i class="sw sw-info" aria-hidden="true"></i> <strong>Sơ đồ tuần tự:</strong> Hiển thị các bước theo đúng trình tự từ Bước 01 đến bước cuối cùng.</span>
-            <span><i class="sw sw-user" aria-hidden="true"></i> <strong>Phân công trách nhiệm đề xuất:</strong> Nhân viên Đại lý thương vụ (soạn thảo &amp; thực hiện) · Trưởng phòng Đại lý (phê duyệt &amp; giám sát).</span>
-          </div>
           <div class="scroller">
             <div class="flow" id="flowCanvas">
               <svg id="wires" aria-hidden="true"></svg>

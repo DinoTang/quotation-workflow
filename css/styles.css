@@ -765,6 +765,10 @@ body.guide .phaserail {
   border-color: var(--rule);
 }
 
+body.ov .progress-notes .flow-only {
+  display: none;
+}
+
 .pband {
   background: var(--surface);
   border: 1px solid var(--rule);
