@@ -755,6 +755,15 @@ body.guide .phaserail {
 .sw-reset { background: var(--risk); }
 .sw-warn { background: var(--warn); }
 .sw-user { background: var(--gold); }
+.sw-store { background: var(--ink-2); }
+
+/* Hộp ghi chú chung trong khối tiến độ: 4 mục, lưới 2 cột */
+.progress-notes {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 36px;
+  background: var(--surface-2);
+  border-color: var(--rule);
+}
 
 .pband {
   background: var(--surface);
@@ -2888,6 +2897,14 @@ footer {
 
   .metric + .metric {
     padding-left: 12px;
+  }
+
+  .metric:nth-child(3) {
+    padding-left: 0;
+  }
+
+  .progress-notes {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .pband > .bhead {
